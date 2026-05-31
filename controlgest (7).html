@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ControlGest - Auditoría & Control</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --sidebar-bg:#3d0a2e;
+    --sidebar-accent:#5c1446;
+    --sidebar-active:#e0407b;
+    --sidebar-text:#d4a0bc;
+    --sidebar-text-active:#fff;
+    --main-bg:#fdf0f5;
+    --white:#fff;
+    --blue:#e0407b;
+    --blue-light:#fde8f2;
+    --green:#16a34a;
+    --green-light:#dcfce7;
+    --orange:#ea580c;
+    --orange-light:#fff7ed;
+    --red:#dc2626;
+    --gray:#64748b;
+    --gray-light:#e2e8f0;
+    --text:#1a0a12;
+    --text-muted:#7a5068;
+    --border:#f0c8db;
+    --shadow:0 1px 3px rgba(0,0,0,.08);
+    --shadow-md:0 4px 16px rgba(0,0,0,.1);
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--main-bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+  /* SIDEBAR */
+  .sidebar{width:188px;min-width:188px;background:var(--sidebar-bg);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+  .logo-area{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .logo-area .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#e0407b,#b5185a);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+  .logo-area .logo-icon svg{width:20px;height:20px;fill:#fff}
+  .logo-area .logo-name{color:#fff;font-weight:700;font-size:15px;letter-spacing:-.3px}
+  .logo-area .logo-sub{color:var(--sidebar-text);font-size:11px;margin-top:1px}
+  .nav-section{padding:16px 10px 8px}
+  .nav-label{color:rgba(143,163,200,.5);font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:0 8px;margin-bottom:6px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--sidebar-text);font-size:13.5px;font-weight:500;transition:all .15s;margin-bottom:2px;text-decoration:none}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#c5d1e8}
+  .nav-item.active{background:var(--sidebar-active);color:#fff}
+  .nav-item svg{width:17px;height:17px;flex-shrink:0;opacity:.8}
+  .nav-item.active svg{opacity:1}
+  .sidebar-footer{margin-top:auto;padding:12px 10px;border-top:1px solid rgba(255,255,255,.06)}
+  .logout-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--sidebar-text);cursor:pointer;border-radius:8px;font-size:13.5px;transition:all .15s}
+  .logout-btn:hover{background:rgba(220,38,38,.15);color:#fca5a5}
+
+  /* TOPBAR */
+  .main-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-shrink:0}
+  .topbar-notif{width:36px;height:36px;border-radius:50%;background:var(--main-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;border:1px solid var(--border)}
+  .notif-dot{width:8px;height:8px;background:#ef4444;border-radius:50%;position:absolute;top:6px;right:6px;border:2px solid #fff}
+  .user-info{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#e0407b,#9333ea);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+  .user-name{font-weight:600;font-size:13.5px}
+  .user-role{font-size:11.5px;color:var(--text-muted)}
+
+  /* CONTENT AREA */
+  .content{flex:1;display:flex;overflow:hidden}
+
+  /* PANEL CLIENTES */
+  .clients-panel{width:290px;min-width:290px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+  .clients-header{padding:18px 16px 12px;border-bottom:1px solid var(--border)}
+  .clients-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .clients-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+  .btn-new{background:var(--blue);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+  .btn-new:hover{background:#1d4ed8}
+  .search-filter{display:flex;gap:8px}
+  .search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--main-bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px}
+  .search-box input{background:none;border:none;outline:none;font-family:inherit;font-size:13px;color:var(--text);width:100%}
+  .search-box input::placeholder{color:var(--text-muted)}
+  .filter-btn{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:var(--main-bg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .clients-table-header{display:grid;grid-template-columns:1fr 110px;padding:8px 14px;font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  .clients-list{overflow-y:auto;flex:1}
+  .client-row{display:grid;grid-template-columns:1fr 110px;align-items:center;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+  .client-row:hover{background:#f8fafc}
+  .client-row.active{background:var(--blue-light);border-left:3px solid var(--blue)}
+  .client-cell{display:flex;align-items:center;gap:9px}
+  .client-avatar{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#fff;flex-shrink:0}
+  .client-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .client-rut{font-size:12.5px;color:var(--text-muted);font-family:'DM Mono',monospace}
+  .pagination{padding:10px 14px;display:flex;align-items:center;gap:4px;border-top:1px solid var(--border)}
+  .page-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;background:var(--white);transition:all .15s}
+  .page-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .page-btn:hover:not(.active){background:var(--main-bg)}
+
+  /* DETAIL PANEL */
+  .detail-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .detail-header{background:var(--white);border-bottom:1px solid var(--border);padding:16px 24px}
+  .detail-top{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+  .company-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+  .company-name{font-size:20px;font-weight:700;letter-spacing:-.4px;display:flex;align-items:center;gap:10px}
+  .badge-active{background:var(--green-light);color:var(--green);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .badge-inactive{background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+  .company-rut{font-size:13px;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:2px}
+  .detail-actions{margin-left:auto;display:flex;gap:8px}
+  .btn-edit{background:var(--white);border:1px solid var(--border);padding:7px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-edit:hover{background:var(--main-bg)}
+  .tabs{display:flex;gap:0;border-bottom:none}
+  .tab{padding:8px 16px;font-size:13.5px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+  .tab:hover:not(.active){color:var(--text)}
+
+  /* DETAIL CONTENT */
+  .detail-content{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+
+  /* INFO CARDS */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr 300px;gap:16px}
+  .info-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .info-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+  .info-field{display:flex;align-items:flex-start;gap:10px}
+  .field-icon{width:32px;height:32px;border-radius:8px;background:var(--main-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .field-icon svg{width:15px;height:15px;color:var(--blue)}
+  .field-label{font-size:11.5px;color:var(--text-muted);margin-bottom:2px}
+  .field-value{font-size:13.5px;font-weight:500;color:var(--text)}
+  .payment-card{background:#fde8f2;border:1px solid #f9b8d4}
+  .payment-card-title{font-size:12px;font-weight:600;color:#b5185a;margin-bottom:10px}
+  .payment-date{font-size:22px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .payment-service{font-size:12.5px;color:var(--text-muted);margin-bottom:4px}
+  .payment-amount{font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px}
+  .btn-calendar{background:var(--white);border:1px solid var(--border);padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;width:100%;transition:all .15s}
+  .btn-calendar:hover{background:var(--main-bg)}
+
+  /* NEEDS + HISTORY */
+  .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .card-title{font-size:15px;font-weight:700;margin-bottom:14px;letter-spacing:-.2px}
+  .needs-list{list-style:none}
+  .needs-list li{padding:5px 0;font-size:13.5px;color:var(--text);display:flex;align-items:center;gap:8px}
+  .needs-list li::before{content:'•';color:var(--blue);font-size:16px}
+  .obs-label{font-weight:600;font-size:13px;margin-top:12px;margin-bottom:4px}
+  .obs-text{font-size:13px;color:var(--text-muted);line-height:1.5}
+  .history-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .history-item:last-child{border-bottom:none}
+  .hist-dot{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0}
+  .hist-dot.green{background:var(--green)}
+  .hist-dot.blue{background:var(--blue)}
+  .hist-dot.orange{background:var(--orange)}
+  .hist-icon{width:30px;height:30px;border-radius:8px;background:var(--main-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .hist-title{font-size:13.5px;font-weight:600}
+  .hist-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+  .hist-date{font-size:11.5px;color:var(--text-muted);margin-left:auto;white-space:nowrap}
+  .link-more{font-size:12.5px;color:var(--blue);cursor:pointer;font-weight:500;margin-top:10px;display:inline-block}
+  .link-more:hover{text-decoration:underline}
+
+  /* PAYMENT TABLE */
+  .payment-table-section{display:grid;grid-template-columns:1fr 220px;gap:16px}
+  .table-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .table-card .card-title{padding:16px 18px 0;margin-bottom:0}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  thead th{padding:10px 16px;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);text-align:left;background:var(--main-bg);border-bottom:1px solid var(--border)}
+  tbody td{padding:11px 16px;font-size:13px;border-bottom:1px solid var(--border)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#f8fafc}
+  .badge-pending{background:var(--orange-light);color:var(--orange);padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;display:inline-block}
+  .badge-paid{background:var(--green-light);color:var(--green);padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;display:inline-block}
+  .summary-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .summary-card .card-title{margin-bottom:16px}
+  .summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .summary-row:last-child{border-bottom:none;font-weight:700}
+  .summary-val{font-weight:600;font-family:'DM Mono',monospace;font-size:13px}
+  .summary-val.red{color:var(--red)}
+  .summary-val.green{color:var(--green)}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+  .modal-overlay.hidden{display:none}
+  .modal{background:var(--white);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  .modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+  .modal-close{width:32px;height:32px;border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text-muted);background:none;transition:all .15s}
+  .modal-close:hover{background:var(--main-bg)}
+  .modal-body{padding:20px 24px}
+  .form-group{margin-bottom:16px}
+  .form-label{font-size:13px;font-weight:600;margin-bottom:6px;display:block;color:var(--text)}
+  .form-input,.form-textarea,.form-select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13.5px;outline:none;transition:border .15s;background:var(--white)}
+  .form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .form-textarea{resize:vertical;min-height:72px}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-cancel{background:var(--white);border:1px solid var(--border);padding:9px 20px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+  .btn-cancel:hover{background:var(--main-bg)}
+  .btn-save{background:var(--blue);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+  .btn-save:hover{background:#1d4ed8}
+  .needs-inputs{display:flex;flex-direction:column;gap:6px}
+  .need-row{display:flex;gap:8px}
+  .need-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;outline:none}
+  .need-row input:focus{border-color:var(--blue)}
+  .btn-add-need{background:none;border:1px dashed var(--border);border-radius:7px;padding:7px 12px;font-family:inherit;font-size:13px;color:var(--blue);cursor:pointer;width:100%;margin-top:4px}
+  .btn-add-need:hover{background:var(--blue-light)}
+  .btn-remove-need{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;flex-shrink:0}
+  .btn-remove-need:hover{background:#fee2e2;border-color:#fca5a5;color:var(--red)}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 18px;border-radius:10px;font-size:13.5px;font-weight:500;z-index:2000;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);transform:translateY(80px);opacity:0;transition:all .3s}
+  .toast.show{transform:translateY(0);opacity:1}
+  .toast-icon{width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  /* SECTIONS (other pages placeholder) */
+  .page-section{display:none;flex:1;padding:32px;align-items:flex-start;justify-content:center}
+  .page-section.active{display:flex}
+  .placeholder-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:48px;text-align:center;max-width:420px;width:100%}
+  .placeholder-icon{width:56px;height:56px;border-radius:14px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .placeholder-title{font-size:20px;font-weight:700;margin-bottom:8px}
+  .placeholder-sub{font-size:14px;color:var(--text-muted)}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:10px}
+  ::-webkit-scrollbar-thumb:hover{background:#9ca3af}
+
+  /* ── AUTH SCREEN ── */
+  #authScreen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#3d0a2e 0%,#5c1446 50%,#7a1a5e 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+  #authScreen.hidden{display:none}
+  .auth-card{background:#fff;border-radius:20px;width:100%;max-width:420px;padding:40px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+  .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+  .auth-logo-icon{width:44px;height:44px;background:linear-gradient(135deg,#e0407b,#b5185a);border-radius:12px;display:flex;align-items:center;justify-content:center}
+  .auth-logo-icon svg{width:24px;height:24px;fill:#fff}
+  .auth-logo-name{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#1a0a12}
+  .auth-logo-sub{font-size:11px;color:#7a5068}
+  .auth-tabs{display:flex;gap:0;border:1px solid #f0c8db;border-radius:10px;padding:4px;margin-bottom:28px;background:#fdf0f5}
+  .auth-tab{flex:1;padding:8px;border-radius:7px;text-align:center;font-size:13.5px;font-weight:600;cursor:pointer;color:#7a5068;transition:all .2s}
+  .auth-tab.active{background:#e0407b;color:#fff;box-shadow:0 2px 8px rgba(224,64,123,.3)}
+  .auth-form-title{font-size:20px;font-weight:700;margin-bottom:6px;color:#1a0a12;letter-spacing:-.3px}
+  .auth-form-sub{font-size:13px;color:#7a5068;margin-bottom:24px}
+  .auth-group{margin-bottom:16px}
+  .auth-label{font-size:12.5px;font-weight:600;color:#1a0a12;display:block;margin-bottom:6px}
+  .auth-input{width:100%;padding:10px 14px;border:1.5px solid #f0c8db;border-radius:9px;font-family:inherit;font-size:14px;outline:none;transition:border .15s;background:#fff;color:#1a0a12}
+  .auth-input:focus{border-color:#e0407b;box-shadow:0 0 0 3px rgba(224,64,123,.12)}
+  .auth-btn{width:100%;padding:12px;background:linear-gradient(135deg,#e0407b,#b5185a);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:all .2s;letter-spacing:-.2px}
+  .auth-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(224,64,123,.4)}
+  .auth-btn:active{transform:translateY(0)}
+  .auth-error{color:#dc2626;font-size:12.5px;margin-top:8px;display:none}
+  .auth-users-hint{font-size:11.5px;color:#7a5068;text-align:center;margin-top:16px;line-height:1.5}
+
+  /* ── DELETE BUTTON ── */
+  .btn-delete{background:#fff;border:1px solid #fca5a5;color:#dc2626;padding:7px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-delete:hover{background:#fee2e2;border-color:#dc2626}
+
+  /* ── CONFIRM DELETE MODAL ── */
+  #deleteOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1100;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+  #deleteOverlay.hidden{display:none}
+  .delete-modal{background:#fff;border-radius:16px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
+  .delete-modal-top{background:#fee2e2;padding:24px;text-align:center}
+  .delete-modal-icon{width:52px;height:52px;background:#fca5a5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+  .delete-modal-title{font-size:17px;font-weight:700;color:#1a0a12}
+  .delete-modal-sub{font-size:13px;color:#7a5068;margin-top:4px}
+  .delete-modal-body{padding:20px 24px 24px;display:flex;gap:10px;justify-content:flex-end}
+  .btn-confirm-delete{background:#dc2626;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+  .btn-confirm-delete:hover{background:#b91c1c}
+
+  /* ── FULL PAGE SECTIONS ── */
+  .page-section{display:none;flex:1;overflow:hidden;flex-direction:column}
+  .page-section.active{display:flex}
+  .page-full{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--main-bg)}
+  .page-header{background:var(--white);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .page-header-title{font-size:20px;font-weight:700;letter-spacing:-.4px}
+  .page-header-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
+  .page-body{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+
+  /* ── PLANILLA / SPREADSHEET ── */
+  .sheet-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;flex-shrink:0;background:var(--white);padding:0 28px}
+  .sheet-tab{padding:10px 20px;font-size:13.5px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;white-space:nowrap}
+  .sheet-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+  .sheet-wrap{flex:1;overflow:auto;background:var(--white)}
+  .sheet-toolbar{display:flex;align-items:center;gap:10px;padding:10px 28px;background:var(--white);border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .sheet-select{padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;outline:none;background:var(--white);color:var(--text)}
+  .sheet-table{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+  .sheet-table th{background:#f8fafc;border:1px solid var(--border);padding:9px 12px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);white-space:nowrap;position:sticky;top:0;z-index:1}
+  .sheet-table td{border:1px solid var(--border);padding:0}
+  .sheet-table td input,.sheet-table td select{width:100%;border:none;outline:none;padding:8px 10px;font-family:inherit;font-size:13px;background:transparent;color:var(--text)}
+  .sheet-table td input:focus,.sheet-table td select:focus{background:#fffbf5;box-shadow:inset 0 0 0 2px var(--blue)}
+  .sheet-table tr:hover td{background:#fdf8fb}
+  .sheet-table td.td-num input{text-align:right;font-family:'DM Mono',monospace}
+  .sheet-table td.td-badge{padding:6px 10px;text-align:center}
+  .sheet-total-row td{background:#fdf0f5;font-weight:700;border-top:2px solid var(--border)}
+  .sheet-total-row td input{font-weight:700;color:var(--text)}
+  .btn-row-del{width:24px;height:24px;border:none;background:none;cursor:pointer;color:#fca5a5;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:all .15s}
+  .btn-row-del:hover{background:#fee2e2;color:#dc2626}
+  .presup-month-header{background:linear-gradient(135deg,#e0407b,#b5185a) !important;color:#fff !important;text-align:center}
+  .presup-total-col{background:#fdf0f5 !important;font-weight:700}
+
+  /* ── DOCUMENTOS PAGE ── */
+  .docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .doc-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .15s;cursor:default}
+  .doc-card:hover{box-shadow:var(--shadow-md)}
+  .doc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .doc-name{font-size:13.5px;font-weight:600;word-break:break-word;line-height:1.3}
+  .doc-meta{font-size:12px;color:var(--text-muted)}
+  .doc-actions{display:flex;gap:6px;margin-top:auto}
+  .btn-doc-dl{flex:1;padding:6px;border:1px solid var(--border);border-radius:7px;background:var(--main-bg);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s}
+  .btn-doc-dl:hover{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+  .btn-doc-del{width:30px;height:30px;border:1px solid #fca5a5;border-radius:7px;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fca5a5;font-size:14px;transition:all .15s;flex-shrink:0}
+  .btn-doc-del:hover{background:#fee2e2;color:#dc2626;border-color:#dc2626}
+  .drop-zone{border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white)}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--blue);background:var(--blue-light)}
+  .drop-zone-icon{font-size:36px;margin-bottom:12px}
+  .drop-zone-text{font-size:14px;font-weight:600;color:var(--text-muted);margin-bottom:4px}
+  .drop-zone-sub{font-size:12px;color:var(--text-muted)}
+  .doc-filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ── CALENDAR PAGE ── */
+  .cal-container{display:grid;grid-template-columns:1fr 300px;gap:20px;flex:1;min-height:0}
+  .cal-main{display:flex;flex-direction:column;gap:0;background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .cal-nav-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s}
+  .cal-nav-btn:hover{background:var(--main-bg)}
+  .cal-month-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);flex:1}
+  .cal-day-name{text-align:center;padding:10px 4px;font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+  .cal-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:90px;padding:8px 6px;cursor:pointer;transition:background .1s;position:relative}
+  .cal-cell:nth-child(7n){border-right:none}
+  .cal-cell:hover{background:#fdf8fb}
+  .cal-cell.today{background:#fde8f2}
+  .cal-cell.other-month .cal-cell-num{color:#cbd5e1}
+  .cal-cell-num{font-size:13px;font-weight:600;margin-bottom:4px}
+  .cal-cell.today .cal-cell-num{background:var(--blue);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .cal-event{font-size:10.5px;background:var(--blue-light);color:var(--blue);border-radius:4px;padding:2px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;cursor:pointer}
+  .cal-event.ev-venc{background:#fff7ed;color:#ea580c}
+  .cal-event.ev-reunion{background:#f0fdf4;color:#16a34a}
+  .cal-sidebar{display:flex;flex-direction:column;gap:16px}
+  .cal-export-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .cal-export-title{font-size:15px;font-weight:700;margin-bottom:14px}
+  .cal-export-btn{width:100%;padding:10px 14px;border-radius:9px;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .15s;margin-bottom:8px;border:1px solid var(--border);background:var(--white)}
+  .cal-export-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+  .cal-export-btn.gcal{background:#fff;border-color:#4285f4;color:#4285f4}
+  .cal-export-btn.gcal:hover{background:#f0f4ff}
+  .cal-export-btn.outlook{background:#fff;border-color:#0078d4;color:#0078d4}
+  .cal-export-btn.outlook:hover{background:#e8f4ff}
+  .cal-export-btn.ics{background:#fff;border-color:#16a34a;color:#16a34a}
+  .cal-export-btn.ics:hover{background:#f0fdf4}
+  .cal-events-list{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:18px;flex:1;overflow-y:auto}
+  .cal-ev-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+  .cal-ev-item:last-child{border-bottom:none}
+  .cal-ev-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
+  .cal-ev-info{flex:1}
+  .cal-ev-title{font-size:13px;font-weight:600}
+  .cal-ev-sub{font-size:11.5px;color:var(--text-muted)}
+  .cal-ev-date{font-size:11px;color:var(--text-muted);white-space:nowrap}
+  /* add-event modal */
+  .cal-add-btn{padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+  .cal-add-btn:hover{background:#b5185a}
+</style>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeLCqim3hQknIAvumAV0oOYo55p3xskqM",
+      authDomain: "controlgest-44f78.firebaseapp.com",
+      projectId: "controlgest-44f78",
+      storageBucket: "controlgest-44f78.firebasestorage.app",
+      messagingSenderId: "1066602211834",
+      appId: "1:1066602211834:web:5cf32818e8583f0fe7dc43"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      </div>
+      <div>
+        <div class="auth-logo-name">ControlGest</div>
+        <div class="auth-logo-sub">Auditoría & Control</div>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="showAuthTab('login')">Iniciar sesión</div>
+      <div class="auth-tab" id="tabRegister" onclick="showAuthTab('register')">Registrarse</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginForm">
+      <div class="auth-form-title">Bienvenido de vuelta</div>
+      <div class="auth-form-sub">Ingresa tus credenciales para continuar</div>
+      <div class="auth-group">
+        <label class="auth-label">Correo electrónico</label>
+        <input class="auth-input" id="loginUser" type="email" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div class="auth-group">
+        <label class="auth-label">Contraseña</label>
+        <input class="auth-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="auth-error" id="loginError">Usuario o contraseña incorrectos.</div>
+      <button class="auth-btn" onclick="doLogin()">Entrar</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerForm" style="display:none">
+      <div class="auth-form-title">Crear cuenta</div>
+      <div class="auth-form-sub">Regístrate para acceder al sistema</div>
+      <div class="auth-group">
+        <label class="auth-label">Nombre completo</label>
+        <input class="auth-input" id="regName" placeholder="Ej: Andrea Valdés">
+      </div>
+      <div class="auth-group">
+        <label class="auth-label">Correo electrónico</label>
+        <input class="auth-input" id="regUser" type="email" placeholder="tu@correo.com">
+      </div>
+      <div class="auth-group">
+        <label class="auth-label">Contraseña</label>
+        <input class="auth-input" id="regPass" type="password" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <div class="auth-error" id="registerError"></div>
+      <button class="auth-btn" onclick="doRegister()">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-area">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+    </div>
+    <div class="logo-name">ControlGest</div>
+    <div class="logo-sub">Auditoría & Control</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-item" onclick="showPage('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item active" id="nav-clientes" onclick="showPage('clientes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </div>
+    <div class="nav-item" onclick="showPage('servicios')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      Servicios
+    </div>
+    <div class="nav-item" onclick="showPage('facturacion')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Facturación
+    </div>
+    <div class="nav-item" onclick="showPage('pagos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Pagos
+    </div>
+    <div class="nav-item" onclick="showPage('tareas')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Tareas
+    </div>
+    <div class="nav-item" onclick="showPage('documentos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      Documentos
+    </div>
+    <div class="nav-item" onclick="showPage('reportes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reportes
+    </div>
+    <div class="nav-item" onclick="showPage('calendario')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Calendario
+    </div>
+    <div class="nav-item" onclick="showPage('configuracion')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12H4M20 12h2"/></svg>
+      Configuración
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="logout-btn" onclick="confirmLogout()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Cerrar sesión
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-area">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-notif">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-dot"></div>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar">AV</div>
+      <div>
+        <div class="user-name">Andrea Valdés</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- PAGE: CLIENTES -->
+    <div id="page-clientes" style="display:flex;flex:1;overflow:hidden">
+
+      <!-- CLIENT LIST -->
+      <div class="clients-panel">
+        <div class="clients-header">
+          <div class="clients-header-top">
+            <span class="clients-title">Clientes</span>
+            <button class="btn-new" onclick="openNewClientModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nuevo Cliente
+            </button>
+          </div>
+          <div class="search-filter">
+            <div class="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Buscar cliente..." oninput="filterClients(this.value)" id="searchInput">
+            </div>
+            <div class="filter-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="clients-table-header">
+          <span>Cliente ↑</span>
+          <span>RUT</span>
+        </div>
+        <div class="clients-list" id="clientsList"></div>
+        <div class="pagination">
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+
+      <!-- CLIENT DETAIL -->
+      <div class="detail-panel" id="detailPanel">
+        <!-- Header -->
+        <div class="detail-header">
+          <div class="detail-top">
+            <div class="company-avatar" id="detailAvatar"></div>
+            <div>
+              <div class="company-name" id="detailName">
+                <span id="detailNameText"></span>
+                <span id="detailBadge" class="badge-active">Activo</span>
+              </div>
+              <div class="company-rut" id="detailRut"></div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn-edit" onclick="openEditModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar Cliente
+              </button>
+              <button class="btn-edit" onclick="downloadClientPDF()" style="background:#fff3f0;border-color:#fca5a5;color:#dc2626" title="Descargar PDF del cliente">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                PDF
+              </button>
+              <button class="btn-delete" onclick="openDeleteModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                Eliminar
+              </button>
+            </div>
+          </div>
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'resumen')">Resumen</div>
+            <div class="tab" onclick="switchTab(this,'info')">Información General</div>
+            <div class="tab" onclick="switchTab(this,'necesidades')">Necesidades</div>
+            <div class="tab" onclick="switchTab(this,'servicios')">Servicios Contratados</div>
+            <div class="tab" onclick="switchTab(this,'pagos')">Pagos</div>
+            <div class="tab" onclick="switchTab(this,'documentos')">Documentos</div>
+            <div class="tab" onclick="switchTab(this,'historial')">Historial</div>
+          </div>
+        </div>
+
+        <!-- Tab content -->
+        <div class="detail-content" id="detailContent"></div>
+      </div>
+    </div>
+
+    <!-- OTHER PAGES -->
+    <div id="page-dashboard" class="page-section">
+      <div class="placeholder-card">
+        <div class="placeholder-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <div class="placeholder-title">Dashboard</div>
+        <div class="placeholder-sub">Próximamente — métricas, gráficos y KPIs de tus clientes.</div>
+      </div>
+    </div>
+    <div id="page-servicios" class="page-section">
+      <div class="placeholder-card">
+        <div class="placeholder-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div class="placeholder-title">Servicios</div>
+        <div class="placeholder-sub">Gestiona el catálogo de servicios de auditoría y control.</div>
+      </div>
+    </div>
+    <div id="page-facturacion" class="page-section">
+      <div class="placeholder-card">
+        <div class="placeholder-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="placeholder-title">Facturación</div>
+        <div class="placeholder-sub">Emisión y seguimiento de facturas por cliente.</div>
+      </div>
+    </div>
+    <div id="page-pagos" class="page-section">
+      <div class="page-full">
+        <div class="page-header">
+          <div>
+            <div class="page-header-title">Planilla de Ingresos y Egresos</div>
+            <div class="page-header-sub">Registro financiero tipo Excel — todos tus movimientos</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-new" onclick="addSheetRow()">+ Agregar fila</button>
+            <button class="btn-edit" onclick="importSheetExcel()" style="gap:6px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importar Excel/CSV
+            </button>
+            <button class="btn-edit" onclick="exportSheetExcel()" style="gap:6px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar Excel
+            </button>
+            <input type="file" id="sheetImportInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleSheetImport(this)">
+          </div>
+        </div>
+        <div class="sheet-tabs" id="sheetTabs">
+          <div class="sheet-tab active" onclick="switchSheetTab('ingresos',this)">💰 Ingresos y Egresos</div>
+          <div class="sheet-tab" onclick="switchSheetTab('presupuesto',this)">📊 Presupuesto Anual</div>
+        </div>
+        <!-- INGRESOS/EGRESOS -->
+        <div id="sheet-ingresos" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div class="sheet-toolbar">
+            <select class="sheet-select" id="sheetFilterCliente" onchange="renderSheet()">
+              <option value="">Todos los clientes</option>
+            </select>
+            <select class="sheet-select" id="sheetFilterTipo" onchange="renderSheet()">
+              <option value="">Ingreso y Egreso</option>
+              <option value="Ingreso">Solo Ingresos</option>
+              <option value="Egreso">Solo Egresos</option>
+            </select>
+            <select class="sheet-select" id="sheetFilterEstado" onchange="renderSheet()">
+              <option value="">Todos los estados</option>
+              <option value="Pagado">Pagado</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Anulado">Anulado</option>
+            </select>
+            <span id="sheetSummary" style="margin-left:auto;font-size:13px;font-weight:600;color:var(--text-muted)"></span>
+          </div>
+          <div class="sheet-wrap">
+            <table class="sheet-table" id="sheetTable">
+              <thead><tr>
+                <th style="width:40px">#</th>
+                <th style="min-width:150px">Cliente</th>
+                <th style="min-width:120px">Concepto / Servicio</th>
+                <th style="width:90px">Tipo</th>
+                <th style="width:110px">Fecha Emisión</th>
+                <th style="width:110px">Fecha Vencim.</th>
+                <th style="width:110px">Monto ($)</th>
+                <th style="width:100px">Estado</th>
+                <th style="min-width:120px">N° Documento</th>
+                <th style="min-width:120px">Observación</th>
+                <th style="width:36px"></th>
+              </tr></thead>
+              <tbody id="sheetBody"></tbody>
+              <tfoot><tr class="sheet-total-row" id="sheetTotals">
+                <td colspan="6" style="padding:8px 12px;font-size:12px;color:var(--text-muted)">TOTALES</td>
+                <td colspan="5" id="sheetTotalsVal" style="padding:8px 12px"></td>
+              </tr></tfoot>
+            </table>
+          </div>
+        </div>
+        <!-- PRESUPUESTO ANUAL -->
+        <div id="sheet-presupuesto" style="flex:1;flex-direction:column;overflow:hidden;display:none">
+          <div class="sheet-toolbar">
+            <select class="sheet-select" id="presupYear" onchange="renderPresupuesto()">
+            </select>
+            <button class="btn-new" style="font-size:12.5px;padding:7px 12px" onclick="addPresupRow()">+ Agregar categoría</button>
+          </div>
+          <div class="sheet-wrap">
+            <table class="sheet-table" id="presupTable">
+              <thead><tr id="presupHeader"></tr></thead>
+              <tbody id="presupBody"></tbody>
+              <tfoot><tr id="presupTotals" class="sheet-total-row"></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="page-tareas" class="page-section">
+      <div class="placeholder-card">
+        <div class="placeholder-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <div class="placeholder-title">Tareas</div>
+        <div class="placeholder-sub">Seguimiento de tareas y actividades por cliente.</div>
+      </div>
+    </div>
+    <div id="page-documentos" class="page-section">
+      <div class="page-full">
+        <div class="page-header">
+          <div>
+            <div class="page-header-title">Documentos</div>
+            <div class="page-header-sub">Repositorio de archivos por cliente</div>
+          </div>
+          <button class="btn-new" onclick="document.getElementById('docFileInput').click()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Subir Archivo
+          </button>
+          <input type="file" id="docFileInput" multiple style="display:none" onchange="handleDocUpload(this)">
+        </div>
+        <div class="page-body">
+          <div class="doc-filter-bar">
+            <select class="sheet-select" id="docFilterCliente" onchange="renderDocs()">
+              <option value="">Todos los clientes</option>
+            </select>
+            <select class="sheet-select" id="docFilterTipo" onchange="renderDocs()">
+              <option value="">Todos los tipos</option>
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
+              <option value="word">Word</option>
+              <option value="imagen">Imagen</option>
+              <option value="otro">Otro</option>
+            </select>
+            <span id="docCount" style="font-size:12.5px;color:var(--text-muted);margin-left:auto"></span>
+          </div>
+          <div class="drop-zone" id="docDropZone" onclick="document.getElementById('docFileInput').click()"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDocDrop(event)">
+            <div class="drop-zone-icon">📁</div>
+            <div class="drop-zone-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+            <div class="drop-zone-sub">Soporta PDF, Word, Excel, imágenes y cualquier archivo</div>
+          </div>
+          <div class="docs-grid" id="docsGrid"></div>
+        </div>
+      </div>
+    </div>
+    <div id="page-reportes" class="page-section">
+      <div class="placeholder-card">
+        <div class="placeholder-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="placeholder-title">Reportes</div>
+        <div class="placeholder-sub">Análisis e informes de gestión y control.</div>
+      </div>
+    </div>
+    <div id="page-calendario" class="page-section">
+      <div class="page-full">
+        <div class="page-header">
+          <div>
+            <div class="page-header-title">Calendario</div>
+            <div class="page-header-sub">Pagos, vencimientos y reuniones de todos tus clientes</div>
+          </div>
+          <button class="cal-add-btn" onclick="openCalEventModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Evento
+          </button>
+        </div>
+        <div class="page-body" style="flex-direction:row;gap:20px;padding:20px 28px">
+          <div style="flex:1;display:flex;flex-direction:column;gap:0;background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="calPrev()">‹</button>
+              <span class="cal-month-title" id="calTitle"></span>
+              <button class="cal-nav-btn" onclick="calNext()">›</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div class="cal-sidebar">
+            <div class="cal-export-card">
+              <div class="cal-export-title">📤 Exportar Calendario</div>
+              <button class="cal-export-btn gcal" onclick="exportGoogleCal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#4285f4"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+                Agregar a Google Calendar
+              </button>
+              <button class="cal-export-btn outlook" onclick="exportOutlook()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#0078d4"><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+                Agregar a Outlook
+              </button>
+              <button class="cal-export-btn ics" onclick="exportICS()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Descargar archivo .ics
+              </button>
+              <p style="font-size:11.5px;color:var(--text-muted);margin-top:8px">El .ics funciona con Gmail, Outlook, Apple Calendar y cualquier app de calendario.</p>
+            </div>
+            <div class="cal-events-list" id="calEventsList">
+              <div style="font-size:14px;font-weight:700;margin-bottom:12px">Próximos eventos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="page-configuracion" class="page-section">
+      <div class="placeholder-card">
+        <div class="placeholder-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 2v2M12 20v2M2 12H4M20 12h2"/></svg></div>
+        <div class="placeholder-title">Configuración</div>
+        <div class="placeholder-sub">Ajustes del sistema, usuarios y permisos.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO / EDITAR CLIENTE -->
+<div class="modal-overlay hidden" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Nuevo Cliente</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre / Razón Social *</label>
+          <input class="form-input" id="f-name" placeholder="Constructora Ejemplo SpA">
+        </div>
+        <div class="form-group">
+          <label class="form-label">RUT *</label>
+          <input class="form-input" id="f-rut" placeholder="76.123.456-7">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Clave / Contraseña</label>
+          <input class="form-input" id="f-clave" type="password" placeholder="Clave del portal SII">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Giro</label>
+          <input class="form-input" id="f-giro" placeholder="Construcción de edificios">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input class="form-input" id="f-telefono" placeholder="+56 9 1234 5678">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo</label>
+          <input class="form-input" id="f-correo" type="email" placeholder="contacto@empresa.cl">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dirección</label>
+        <input class="form-input" id="f-direccion" placeholder="Av. Providencia 1234, Oficina 502, Santiago">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Segmento</label>
+          <select class="form-select" id="f-segmento">
+            <option value="">Seleccionar...</option>
+            <option>Empresa Pequeña</option>
+            <option>Empresa Mediana</option>
+            <option>Empresa Grande</option>
+            <option>Persona Natural</option>
+            <option>Corporación</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ejecutivo Asignado</label>
+          <input class="form-input" id="f-ejecutivo" value="Andrea Valdés">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Necesidades del Cliente</label>
+        <div class="needs-inputs" id="needsInputs">
+          <div class="need-row">
+            <input type="text" placeholder="Ej: Auditoría financiera anual">
+            <button class="btn-remove-need" onclick="removeNeed(this)">×</button>
+          </div>
+        </div>
+        <button class="btn-add-need" onclick="addNeed()">+ Agregar necesidad</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observaciones</label>
+        <textarea class="form-textarea" id="f-obs" placeholder="Notas adicionales sobre el cliente..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Próxima Fecha de Pago</label>
+          <input class="form-input" id="f-fecha" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Monto del Pago</label>
+          <input class="form-input" id="f-monto" placeholder="$950.000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Servicio del Pago</label>
+        <input class="form-input" id="f-servicio" placeholder="Auditoría Financiera Anual">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveClient()" id="btnSave">Guardar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="deleteOverlay" class="hidden">
+  <div class="delete-modal">
+    <div class="delete-modal-top">
+      <div class="delete-modal-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <div class="delete-modal-title">¿Eliminar cliente?</div>
+      <div class="delete-modal-sub" id="deleteModalSub">Esta acción no se puede deshacer.</div>
+    </div>
+    <div class="delete-modal-body">
+      <button class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn-confirm-delete" onclick="confirmDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <span id="toastMsg">Cliente guardado correctamente</span>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const COLORS = ['#2563eb','#7c3aed','#db2777','#d97706','#16a34a','#0891b2','#dc2626','#65a30d'];
+const DEFAULT_CLIENTS = [
+  {id:1,name:'Constructora Andes SpA',rut:'76.123.456-7',clave:'clave123',giro:'Construcción de edificios',telefono:'+56 9 1234 5678',correo:'contacto@constructorandes.cl',direccion:'Av. Providencia 1234, Oficina 502, Santiago, Chile',segmento:'Empresa Mediana',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'Cliente requiere reportes trimestrales de gestión y apoyo en implementación de indicadores KPIs.',necesidades:['Auditoría financiera anual','Control interno y gestión de procesos','Cumplimiento tributario','Asesoría en control de gestión'],registro:'15 de marzo de 2023',proximoPago:{fecha:'25 de mayo de 2024',servicio:'Auditoría Financiera Anual',monto:'$950.000'},pagos:[{doc:1502,serv:'Asesoría Control de Gestión - Mayo',emision:'10/05/2024',venc:'25/05/2024',monto:'$450.000',estado:'Pendiente'},{doc:1501,serv:'Auditoría Financiera Anual',emision:'10/04/2024',venc:'25/04/2024',monto:'$950.000',estado:'Pagado'},{doc:1498,serv:'Asesoría Tributaria - Marzo',emision:'10/03/2024',venc:'25/03/2024',monto:'$350.000',estado:'Pagado'}],totalServicios:4,totalFact:'$2.850.000',totalPagado:'$2.400.000',totalPendiente:'$450.000'},
+  {id:2,name:'Comercializadora del Sur Ltda.',rut:'77.987.654-3',clave:'',giro:'Comercio al por mayor',telefono:'+56 2 2345 6789',correo:'admin@delsur.cl',direccion:'San Diego 456, Santiago',segmento:'Empresa Mediana',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'',necesidades:['Revisión tributaria semestral','Declaración de impuestos'],registro:'02 de enero de 2023',proximoPago:{fecha:'15 de junio de 2024',servicio:'Revisión Tributaria',monto:'$380.000'},pagos:[{doc:1499,serv:'Declaración IVA - Abril',emision:'05/04/2024',venc:'20/04/2024',monto:'$180.000',estado:'Pagado'},{doc:1503,serv:'Revisión Tributaria Semestral',emision:'01/05/2024',venc:'15/06/2024',monto:'$380.000',estado:'Pendiente'}],totalServicios:2,totalFact:'$1.120.000',totalPagado:'$740.000',totalPendiente:'$380.000'},
+  {id:3,name:'Transportes Ruiz y Cía. Ltda.',rut:'76.456.789-1',clave:'',giro:'Transporte de carga',telefono:'+56 9 8765 4321',correo:'ruiz@transportes.cl',direccion:'Ruta 5 Sur km 12, Talca',segmento:'Empresa Pequeña',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'',necesidades:['Control de costos de operación','Auditoría interna anual'],registro:'10 de junio de 2023',proximoPago:{fecha:'30 de junio de 2024',servicio:'Auditoría Interna Anual',monto:'$520.000'},pagos:[{doc:1490,serv:'Control de Costos Q1',emision:'01/02/2024',venc:'28/02/2024',monto:'$210.000',estado:'Pagado'}],totalServicios:2,totalFact:'$730.000',totalPagado:'$210.000',totalPendiente:'$520.000'},
+  {id:4,name:'Servicios Integrales JM SpA',rut:'77.654.321-0',clave:'',giro:'Servicios empresariales',telefono:'+56 2 3456 7890',correo:'jm@integrales.cl',direccion:'Las Condes 789, Santiago',segmento:'Empresa Mediana',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'',necesidades:['Asesoría en control de gestión','Reporting financiero mensual'],registro:'20 de agosto de 2023',proximoPago:{fecha:'05 de julio de 2024',servicio:'Reporting Financiero',monto:'$290.000'},pagos:[],totalServicios:2,totalFact:'$580.000',totalPagado:'$290.000',totalPendiente:'$290.000'},
+  {id:5,name:'Inversiones Patagonia SpA',rut:'76.321.654-8',clave:'',giro:'Inversión inmobiliaria',telefono:'+56 9 1111 2222',correo:'info@patagonia.cl',direccion:'Providencia 321, Santiago',segmento:'Empresa Grande',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'',necesidades:['Due diligence financiero','Auditoría externa anual','Gestión de riesgos'],registro:'05 de febrero de 2022',proximoPago:{fecha:'10 de julio de 2024',servicio:'Auditoría Externa Anual',monto:'$1.850.000'},pagos:[{doc:1488,serv:'Due Diligence Q4 2023',emision:'15/01/2024',venc:'31/01/2024',monto:'$1.200.000',estado:'Pagado'},{doc:1504,serv:'Auditoría Externa Anual',emision:'10/06/2024',venc:'10/07/2024',monto:'$1.850.000',estado:'Pendiente'}],totalServicios:3,totalFact:'$5.100.000',totalPagado:'$3.250.000',totalPendiente:'$1.850.000'},
+  {id:6,name:'Alimentos del Valle Ltda.',rut:'76.879.654-2',clave:'',giro:'Producción agroindustrial',telefono:'+56 75 234 5678',correo:'valle@alimentos.cl',direccion:'Km 8 Camino a Constitución, Talca',segmento:'Empresa Mediana',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'',necesidades:['Cumplimiento tributario','Auditoría de inventarios'],registro:'12 de abril de 2023',proximoPago:{fecha:'20 de junio de 2024',servicio:'Auditoría de Inventarios',monto:'$420.000'},pagos:[],totalServicios:2,totalFact:'$840.000',totalPagado:'$420.000',totalPendiente:'$420.000'},
+  {id:7,name:'Minera Los Andes SpA',rut:'76.223.344-5',clave:'',giro:'Minería metálica',telefono:'+56 2 9876 5432',correo:'contacto@mlosandes.cl',direccion:'Av. Apoquindo 4001, Santiago',segmento:'Empresa Grande',ejecutivo:'Andrea Valdés',estado:'Activo',obs:'',necesidades:['Auditoría financiera anual','Cumplimiento normativo','Gestión de riesgos operacionales'],registro:'01 de octubre de 2021',proximoPago:{fecha:'31 de julio de 2024',servicio:'Auditoría Financiera Anual',monto:'$2.500.000'},pagos:[],totalServicios:3,totalFact:'$7.500.000',totalPagado:'$5.000.000',totalPendiente:'$2.500.000'},
+  {id:8,name:'Consultores del Norte Ltda.',rut:'77.112.233-4',clave:'',giro:'Consultoría empresarial',telefono:'+56 55 234 5678',correo:'norte@consultores.cl',direccion:'Colón 234, Antofagasta',segmento:'Empresa Pequeña',ejecutivo:'Andrea Valdés',estado:'Inactivo',obs:'',necesidades:['Revisión contable trimestral'],registro:'14 de julio de 2023',proximoPago:{fecha:'—',servicio:'—',monto:'—'},pagos:[],totalServicios:1,totalFact:'$480.000',totalPagado:'$480.000',totalPendiente:'$0'},
+];
+let clients = [];
+let selectedClientId = 1;
+let editingId = null;
+let currentTab = 'resumen';
+
+// ─── AVATAR ─────────────────────────────────────────────
+function initials(name){return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+function avatarColor(name){let h=0;for(let c of name)h=(h*31+c.charCodeAt(0))%COLORS.length;return COLORS[h]}
+
+// ─── RENDER LIST ─────────────────────────────────────────
+function renderList(filter=''){
+  const list=document.getElementById('clientsList');
+  const filtered=clients.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase())||c.rut.includes(filter));
+  list.innerHTML=filtered.map(c=>`
+    <div class="client-row${c.id===selectedClientId?' active':''}" onclick="selectClient(${c.id})">
+      <div class="client-cell">
+        <div class="client-avatar" style="background:${avatarColor(c.name)}">${initials(c.name)}</div>
+        <span class="client-name">${c.name}</span>
+      </div>
+      <span class="client-rut">${c.rut}</span>
+    </div>`).join('');
+}
+
+// ─── SELECT CLIENT ────────────────────────────────────────
+function selectClient(id){
+  selectedClientId=id;
+  currentTab='resumen';
+  renderList(document.getElementById('searchInput').value);
+  renderDetail();
+}
+
+// ─── RENDER DETAIL ────────────────────────────────────────
+function renderDetail(){
+  const c=clients.find(x=>x.id===selectedClientId);
+  if(!c)return;
+  const av=document.getElementById('detailAvatar');
+  av.textContent=initials(c.name);
+  av.style.background=avatarColor(c.name);
+  document.getElementById('detailNameText').textContent=c.name;
+  document.getElementById('detailRut').textContent=c.rut;
+  const badge=document.getElementById('detailBadge');
+  badge.textContent=c.estado;
+  badge.className=c.estado==='Activo'?'badge-active':'badge-inactive';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.textContent.toLowerCase().startsWith(currentTab.slice(0,4))));
+  renderTabContent(c);
+}
+
+function switchTab(el,tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab=tab;
+  renderTabContent(clients.find(x=>x.id===selectedClientId));
+}
+
+function renderTabContent(c){
+  const container=document.getElementById('detailContent');
+  if(currentTab==='resumen') container.innerHTML=buildResumen(c);
+  else if(currentTab==='info') container.innerHTML=buildInfo(c);
+  else if(currentTab==='necesidades') container.innerHTML=buildNecesidades(c);
+  else if(currentTab==='servicios') container.innerHTML=buildServicios(c);
+  else if(currentTab==='pagos') container.innerHTML=buildPagos(c);
+  else if(currentTab==='documentos') container.innerHTML=buildDocs(c);
+  else if(currentTab==='historial') container.innerHTML=buildHistorial(c);
+}
+
+function buildResumen(c){
+  const needs=c.necesidades.map(n=>`<li>${n}</li>`).join('');
+  const pagosRows=c.pagos.map(p=>`<tr><td>${p.doc}</td><td>${p.serv}</td><td>${p.emision}</td><td>${p.venc}</td><td><strong>${p.monto}</strong></td><td><span class="${p.estado==='Pagado'?'badge-paid':'badge-pending'}">${p.estado}</span></td></tr>`).join('');
+  return `
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-fields">
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div><div class="field-label">Giro</div><div class="field-value">${c.giro||'—'}</div></div>
+        </div>
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+          <div><div class="field-label">Teléfono</div><div class="field-value">${c.telefono||'—'}</div></div>
+        </div>
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div><div class="field-label">Correo</div><div class="field-value">${c.correo||'—'}</div></div>
+        </div>
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><div class="field-label">Dirección</div><div class="field-value" style="font-size:12.5px">${c.direccion||'—'}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-fields">
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div><div class="field-label">Fecha de Registro</div><div class="field-value">${c.registro||'—'}</div></div>
+        </div>
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div><div class="field-label">Ejecutivo Asignado</div><div class="field-value">${c.ejecutivo||'—'}</div></div>
+        </div>
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+          <div><div class="field-label">Segmento</div><div class="field-value">${c.segmento||'—'}</div></div>
+        </div>
+        <div class="info-field">
+          <div class="field-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div><div class="field-label">Estado</div><div class="field-value"><span class="${c.estado==='Activo'?'badge-active':'badge-inactive'}" style="font-size:12px">${c.estado}</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-card payment-card">
+      <div class="payment-card-title">📅 Próximo Pago</div>
+      <div class="payment-date">${c.proximoPago.fecha}</div>
+      <div class="payment-service">Servicio: ${c.proximoPago.servicio}</div>
+      <div class="payment-amount">Monto: ${c.proximoPago.monto}</div>
+      <button class="btn-calendar" onclick="switchTabByName('pagos')">Ver calendario de pagos</button>
+    </div>
+  </div>
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-title">Necesidades del Cliente</div>
+      <ul class="needs-list">${needs||'<li style="color:var(--text-muted)">Sin necesidades registradas</li>'}</ul>
+      ${c.obs?`<div class="obs-label">Observaciones:</div><div class="obs-text">${c.obs}</div>`:''}
+    </div>
+    <div class="card">
+      <div class="card-title">Historial Reciente</div>
+      ${c.pagos.length?`
+      <div class="history-item">
+        <div class="hist-dot green"></div>
+        <div class="hist-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div style="flex:1"><div class="hist-title">Pago recibido</div><div class="hist-sub">Factura N° ${c.pagos.filter(p=>p.estado==='Pagado')[0]?.doc||'—'} · ${c.pagos.filter(p=>p.estado==='Pagado')[0]?.monto||'—'}</div></div>
+        <span class="hist-date">25/04/2024</span>
+      </div>
+      <div class="history-item">
+        <div class="hist-dot blue"></div>
+        <div class="hist-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><polyline points="9 11 12 14 22 4"/></svg></div>
+        <div style="flex:1"><div class="hist-title">Servicio completado</div><div class="hist-sub">${c.necesidades[0]||'Servicio'} 2023</div></div>
+        <span class="hist-date">10/04/2024</span>
+      </div>
+      <div class="history-item">
+        <div class="hist-dot orange"></div>
+        <div class="hist-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/></svg></div>
+        <div style="flex:1"><div class="hist-title">Documento cargado</div><div class="hist-sub">Informe Final.pdf</div></div>
+        <span class="hist-date">10/04/2024</span>
+      </div>`:'<p style="color:var(--text-muted);font-size:13px">Sin historial registrado.</p>'}
+      <span class="link-more" onclick="switchTabByName('historial')">Ver todo el historial</span>
+    </div>
+  </div>
+  <div class="payment-table-section">
+    <div class="table-card">
+      <div class="card-title">Calendario de Pagos</div>
+      <table>
+        <thead><tr><th>N° Documento</th><th>Servicio</th><th>Fecha de Emisión</th><th>Fecha de Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead>
+        <tbody>${pagosRows||'<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Sin pagos registrados</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="summary-card">
+      <div class="card-title">Resumen Cliente</div>
+      <div class="summary-row"><span>Total Servicios Contratados</span><span class="summary-val">${c.totalServicios}</span></div>
+      <div class="summary-row"><span>Total Facturado (2024)</span><span class="summary-val">${c.totalFact}</span></div>
+      <div class="summary-row"><span>Total Pagado (2024)</span><span class="summary-val green">${c.totalPagado}</span></div>
+      <div class="summary-row"><span>Total Pendiente</span><span class="summary-val red">${c.totalPendiente}</span></div>
+    </div>
+  </div>`;
+}
+
+function buildInfo(c){
+  return `<div class="card" style="max-width:700px">
+    <div class="card-title">Información General</div>
+    <div class="info-fields" style="grid-template-columns:1fr 1fr;gap:18px">
+      ${[['Razón Social',c.name],['RUT',c.rut],['Giro',c.giro],['Teléfono',c.telefono],['Correo',c.correo],['Dirección',c.direccion],['Segmento',c.segmento],['Ejecutivo',c.ejecutivo],['Estado',c.estado],['Registro',c.registro]].map(([l,v])=>`
+      <div class="info-field">
+        <div><div class="field-label">${l}</div><div class="field-value">${v||'—'}</div></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildNecesidades(c){
+  return `<div class="card" style="max-width:600px">
+    <div class="card-title">Necesidades del Cliente</div>
+    <ul class="needs-list" style="margin-bottom:16px">${c.necesidades.length?c.necesidades.map(n=>`<li>${n}</li>`).join(''):'<li style="color:var(--text-muted)">Sin necesidades registradas</li>'}</ul>
+    ${c.obs?`<div class="obs-label">Observaciones:</div><div class="obs-text">${c.obs}</div>`:''}
+    <button class="btn-edit" style="margin-top:16px" onclick="openEditModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Editar Necesidades
+    </button>
+  </div>`;
+}
+
+function buildServicios(c){
+  return `<div class="card"><div class="card-title">Servicios Contratados</div><p style="color:var(--text-muted);font-size:13.5px">Total de servicios contratados: <strong>${c.totalServicios}</strong></p><p style="margin-top:8px;font-size:13px;color:var(--text-muted)">Gestión detallada de servicios disponible en la sección Servicios del menú.</p></div>`;
+}
+
+function buildPagos(c){
+  const rows=c.pagos.map(p=>`<tr><td>${p.doc}</td><td>${p.serv}</td><td>${p.emision}</td><td>${p.venc}</td><td><strong>${p.monto}</strong></td><td><span class="${p.estado==='Pagado'?'badge-paid':'badge-pending'}">${p.estado}</span></td></tr>`).join('');
+  return `<div class="table-card"><div class="card-title" style="padding:16px 18px 0">Calendario de Pagos</div><table><thead><tr><th>N° Documento</th><th>Servicio</th><th>Fecha de Emisión</th><th>Fecha de Vencimiento</th><th>Monto</th><th>Estado</th></tr></thead><tbody>${rows||'<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Sin pagos registrados</td></tr>'}</tbody></table></div>`;
+}
+
+function buildDocs(c){
+  if(!c.docs) c.docs=[];
+  const ext=f=>f.name.split('.').pop().toLowerCase();
+  const icon=f=>{const e=ext(f);if(['pdf'].includes(e))return '📄';if(['xls','xlsx','csv'].includes(e))return '📊';if(['doc','docx'].includes(e))return '📝';if(['png','jpg','jpeg','gif','webp','svg'].includes(e))return '🖼️';if(['zip','rar','7z'].includes(e))return '🗜️';return '📎'};
+  const cards=c.docs.map((d,i)=>`
+    <div class="doc-card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="doc-icon" style="background:var(--blue-light);font-size:22px">${icon(d)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="doc-name">${d.name}</div>
+          <div class="doc-meta">${d.size} · ${d.fecha}</div>
+        </div>
+      </div>
+      <div class="doc-actions">
+        <button class="btn-doc-dl" onclick="downloadDoc(${c.id},${i})">⬇ Descargar</button>
+        <button class="btn-doc-del" onclick="deleteDoc(${c.id},${i})" title="Eliminar">🗑</button>
+      </div>
+    </div>`).join('');
+  return `<div style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:15px;font-weight:700">Documentos del cliente</span>
+      <button class="btn-new" style="font-size:12px;padding:6px 12px" onclick="openDocUploadForClient(${c.id})">+ Subir archivo</button>
+      <input type="file" id="clientDocInput_${c.id}" multiple style="display:none" onchange="handleClientDocUpload(this,${c.id})">
+    </div>
+    ${c.docs.length?`<div class="docs-grid">${cards}</div>`:'<div style="padding:24px;text-align:center;color:var(--text-muted);border:2px dashed var(--border);border-radius:12px;cursor:pointer" onclick="openDocUploadForClient('+c.id+')">📁 Sin documentos — haz clic para subir</div>'}
+  </div>`;
+}
+
+function buildHistorial(c){
+  return `<div class="card"><div class="card-title">Historial Completo</div>${c.pagos.length?c.pagos.map(p=>`<div class="history-item"><div class="hist-dot ${p.estado==='Pagado'?'green':'orange'}"></div><div style="flex:1"><div class="hist-title">${p.estado==='Pagado'?'Pago recibido':'Factura emitida'}</div><div class="hist-sub">Factura N° ${p.doc} · ${p.serv} · ${p.monto}</div></div><span class="hist-date">${p.emision}</span></div>`).join(''):'<p style="color:var(--text-muted);font-size:13px">Sin historial registrado.</p>'}</div>`;
+}
+
+function switchTabByName(name){
+  currentTab=name;
+  const tabs=document.querySelectorAll('.tab');
+  const map={resumen:0,info:1,necesidades:2,servicios:3,pagos:4,documentos:5,historial:6};
+  tabs.forEach((t,i)=>t.classList.toggle('active',i===map[name]));
+  renderTabContent(clients.find(x=>x.id===selectedClientId));
+}
+
+// ─── FILTER ──────────────────────────────────────────────
+function filterClients(val){renderList(val)}
+
+// ─── MODAL ───────────────────────────────────────────────
+function openNewClientModal(){
+  editingId=null;
+  document.getElementById('modalTitle').textContent='Nuevo Cliente';
+  document.getElementById('btnSave').textContent='Guardar Cliente';
+  clearForm();
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function openEditModal(){
+  const c=clients.find(x=>x.id===selectedClientId);
+  if(!c)return;
+  editingId=c.id;
+  document.getElementById('modalTitle').textContent='Editar Cliente';
+  document.getElementById('btnSave').textContent='Actualizar Cliente';
+  document.getElementById('f-name').value=c.name;
+  document.getElementById('f-rut').value=c.rut;
+  document.getElementById('f-clave').value=c.clave||'';
+  document.getElementById('f-giro').value=c.giro||'';
+  document.getElementById('f-telefono').value=c.telefono||'';
+  document.getElementById('f-correo').value=c.correo||'';
+  document.getElementById('f-direccion').value=c.direccion||'';
+  document.getElementById('f-segmento').value=c.segmento||'';
+  document.getElementById('f-ejecutivo').value=c.ejecutivo||'';
+  document.getElementById('f-obs').value=c.obs||'';
+  document.getElementById('f-fecha').value='';
+  document.getElementById('f-monto').value=c.proximoPago?.monto!=='—'?c.proximoPago?.monto:'';
+  document.getElementById('f-servicio').value=c.proximoPago?.servicio!=='—'?c.proximoPago?.servicio:'';
+  // needs
+  const ni=document.getElementById('needsInputs');
+  ni.innerHTML=c.necesidades.map(n=>`<div class="need-row"><input type="text" value="${n}"><button class="btn-remove-need" onclick="removeNeed(this)">×</button></div>`).join('');
+  if(!c.necesidades.length) ni.innerHTML='<div class="need-row"><input type="text" placeholder="Ej: Auditoría financiera anual"><button class="btn-remove-need" onclick="removeNeed(this)">×</button></div>';
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function clearForm(){
+  ['f-name','f-rut','f-clave','f-giro','f-telefono','f-correo','f-direccion','f-ejecutivo','f-obs','f-fecha','f-monto','f-servicio'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-segmento').value='';
+  document.getElementById('f-ejecutivo').value='Andrea Valdés';
+  document.getElementById('needsInputs').innerHTML='<div class="need-row"><input type="text" placeholder="Ej: Auditoría financiera anual"><button class="btn-remove-need" onclick="removeNeed(this)">×</button></div>';
+}
+
+function closeModal(){document.getElementById('modalOverlay').classList.add('hidden')}
+function closeModalOnOverlay(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
+
+function addNeed(){
+  const row=document.createElement('div');
+  row.className='need-row';
+  row.innerHTML='<input type="text" placeholder="Agregar necesidad"><button class="btn-remove-need" onclick="removeNeed(this)">×</button>';
+  document.getElementById('needsInputs').appendChild(row);
+}
+
+function removeNeed(btn){
+  const ni=document.getElementById('needsInputs');
+  if(ni.children.length>1) btn.parentElement.remove();
+}
+
+function saveClient(){
+  const name=document.getElementById('f-name').value.trim();
+  const rut=document.getElementById('f-rut').value.trim();
+  if(!name||!rut){showToast('⚠️ Nombre y RUT son obligatorios','#d97706');return}
+  const needs=[...document.querySelectorAll('#needsInputs .need-row input')].map(i=>i.value.trim()).filter(Boolean);
+  const fechaRaw=document.getElementById('f-fecha').value;
+  let fechaStr='—';
+  if(fechaRaw){const d=new Date(fechaRaw+'T00:00:00');fechaStr=d.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'})}
+  const data={name,rut,clave:document.getElementById('f-clave').value,giro:document.getElementById('f-giro').value,telefono:document.getElementById('f-telefono').value,correo:document.getElementById('f-correo').value,direccion:document.getElementById('f-direccion').value,segmento:document.getElementById('f-segmento').value,ejecutivo:document.getElementById('f-ejecutivo').value||'Andrea Valdés',obs:document.getElementById('f-obs').value,necesidades:needs,proximoPago:{fecha:fechaStr,servicio:document.getElementById('f-servicio').value||'—',monto:document.getElementById('f-monto').value||'—'},estado:'Activo',registro:new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}),pagos:[],totalServicios:0,totalFact:'$0',totalPagado:'$0',totalPendiente:'$0'};
+  if(editingId){
+    const idx=clients.findIndex(c=>c.id===editingId);
+    clients[idx]={...clients[idx],...data};
+    showToast('✅ Cliente actualizado correctamente');
+  } else {
+    data.id=Date.now();
+    clients.push(data);
+    selectedClientId=data.id;
+    showToast('✅ Cliente creado correctamente');
+  }
+  saveData();
+  closeModal();
+  renderList(document.getElementById('searchInput').value);
+  currentTab='resumen';
+  renderDetail();
+}
+
+// ─── PAGES ───────────────────────────────────────────────
+function showPage(page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('page-clientes').style.display=page==='clientes'?'flex':'none';
+  ['dashboard','servicios','facturacion','pagos','tareas','documentos','reportes','calendario','configuracion'].forEach(p=>{
+    const el=document.getElementById('page-'+p);
+    if(el)el.classList.toggle('active',p===page);
+  });
+  if(page==='calendario') renderCalendar();
+  if(page==='pagos'){ populateSheetClientFilter(); renderSheet(); renderPresupuesto(); }
+  if(page==='documentos'){ populateDocClientFilter(); renderDocs(); }
+}
+
+// ─── LOGOUT ──────────────────────────────────────────────
+function confirmLogout(){
+  if(confirm('¿Deseas cerrar sesión?')){
+    sessionStorage.removeItem('cg_session');
+    document.getElementById('authScreen').classList.remove('hidden');
+    document.querySelector('.sidebar').style.display='';
+    document.querySelector('.main-area').style.display='';
+    showToast('👋 Sesión cerrada');
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+function showToast(msg,color='#16a34a'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.querySelector('.toast-icon').style.background=color;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ─── FIREBASE AUTH & PERSISTENCE ──────────────────────────
+let currentUser = null;  // { uid, email, name }
+let unsubscribeSnapshot = null; // Firestore real-time listener
+
+// ── Loading overlay ──
+function showLoading(msg='Cargando...'){
+  let el=document.getElementById('fbLoading');
+  if(!el){
+    el=document.createElement('div');
+    el.id='fbLoading';
+    el.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(61,10,46,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px';
+    el.innerHTML='<div style="width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#e0407b;border-radius:50%;animation:spin 0.8s linear infinite"></div><div id="fbLoadingMsg" style="color:#fff;font-size:15px;font-weight:600"></div>';
+    if(!document.getElementById('fbSpinStyle')){const s=document.createElement('style');s.id='fbSpinStyle';s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(s);}
+    document.body.appendChild(el);
+  }
+  document.getElementById('fbLoadingMsg').textContent=msg;
+  el.style.display='flex';
+}
+function hideLoading(){ const el=document.getElementById('fbLoading'); if(el) el.style.display='none'; }
+
+// ── Save all user data to Firestore ──
+async function saveData(){
+  if(!currentUser) return;
+  try{
+    await db.collection('users').doc(currentUser.uid).collection('data').doc('clients').set({ clients: JSON.stringify(clients) });
+  }catch(e){ console.error('saveData error',e); }
+}
+
+async function saveSheetFirebase(){
+  if(!currentUser) return;
+  try{
+    const rows=loadSheet();
+    await db.collection('users').doc(currentUser.uid).collection('data').doc('sheet').set({ rows: JSON.stringify(rows) });
+  }catch(e){ console.error('saveSheet error',e); }
+}
+
+async function savePresupFirebase(){
+  if(!currentUser) return;
+  try{
+    const p=loadPresup();
+    await db.collection('users').doc(currentUser.uid).collection('data').doc('presup').set({ data: JSON.stringify(p) });
+  }catch(e){ console.error('savePresup error',e); }
+}
+
+async function saveCalEventsFirebase(){
+  if(!currentUser) return;
+  try{
+    const evs=loadCalEvents();
+    await db.collection('users').doc(currentUser.uid).collection('data').doc('calevents').set({ events: JSON.stringify(evs) });
+  }catch(e){ console.error('saveCalEvents error',e); }
+}
+
+async function saveDocsFirebase(){
+  if(!currentUser) return;
+  try{
+    const docs=loadDocs();
+    await db.collection('users').doc(currentUser.uid).collection('data').doc('docs').set({ docs: JSON.stringify(docs) });
+  }catch(e){ console.error('saveDocs error',e); }
+}
+
+// ── Load all user data from Firestore ──
+async function loadAllUserData(uid){
+  showLoading('Cargando tus datos...');
+  try{
+    const base = db.collection('users').doc(uid).collection('data');
+    const [cSnap,sSnap,pSnap,ceSnap,dSnap] = await Promise.all([
+      base.doc('clients').get(),
+      base.doc('sheet').get(),
+      base.doc('presup').get(),
+      base.doc('calevents').get(),
+      base.doc('docs').get()
+    ]);
+    // Clients
+    if(cSnap.exists && cSnap.data().clients){
+      try{ clients = JSON.parse(cSnap.data().clients); }catch(e){ clients = JSON.parse(JSON.stringify(DEFAULT_CLIENTS)); }
+    } else {
+      clients = JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+      await saveData();
+    }
+    // Sheet
+    if(sSnap.exists && sSnap.data().rows){
+      try{ localStorage.setItem(sheetKey(), sSnap.data().rows); }catch(e){}
+    }
+    // Presup
+    if(pSnap.exists && pSnap.data().data){
+      try{ localStorage.setItem(presupKey(), pSnap.data().data); }catch(e){}
+    }
+    // Calendar events
+    if(ceSnap.exists && ceSnap.data().events){
+      try{ localStorage.setItem(calEventsKey(), ceSnap.data().events); }catch(e){}
+    }
+    // Docs (metadata only — base64 stays local to avoid Firestore 1MB limit)
+    if(dSnap.exists && dSnap.data().docs){
+      try{ localStorage.setItem(docsKey(), dSnap.data().docs); }catch(e){}
+    }
+  }catch(e){ console.error('loadAllUserData error',e); clients = JSON.parse(JSON.stringify(DEFAULT_CLIENTS)); }
+  hideLoading();
+}
+
+// ── Patch local save functions to also sync Firebase ──
+const _origSaveSheet = saveSheet;
+function saveSheet(rows){
+  _origSaveSheet(rows);
+  saveSheetFirebase();
+}
+const _origSavePresup = savePresup;
+function savePresup(p){
+  _origSavePresup(p);
+  savePresupFirebase();
+}
+const _origSaveCalEvents = saveCalEvents;
+function saveCalEvents(evs){
+  _origSaveCalEvents(evs);
+  saveCalEventsFirebase();
+}
+const _origSaveDocs = saveDocs;
+function saveDocs(docs){
+  _origSaveDocs(docs);
+  saveDocsFirebase();
+}
+
+// ─── AUTH UI ──────────────────────────────────────────────
+function showAuthTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('loginForm').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('registerError').style.display = 'none';
+}
+
+function doLogin(){
+  const email = document.getElementById('loginUser').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  if(!email||!pass){ errEl.textContent='Completa todos los campos.'; errEl.style.display='block'; return; }
+  showLoading('Iniciando sesión...');
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(()=>{ errEl.style.display='none'; })
+    .catch(err=>{
+      hideLoading();
+      const msgs={'auth/user-not-found':'Usuario no encontrado.','auth/wrong-password':'Contraseña incorrecta.','auth/invalid-email':'Correo inválido.','auth/invalid-credential':'Correo o contraseña incorrectos.'};
+      errEl.textContent = msgs[err.code]||'Error al iniciar sesión.';
+      errEl.style.display='block';
+    });
+}
+
+function doRegister(){
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regUser').value.trim();
+  const pass  = document.getElementById('regPass').value;
+  const errEl = document.getElementById('registerError');
+  if(!name||!email||!pass){ errEl.textContent='Completa todos los campos.'; errEl.style.display='block'; return; }
+  if(pass.length<6){ errEl.textContent='La contraseña debe tener al menos 6 caracteres.'; errEl.style.display='block'; return; }
+  showLoading('Creando cuenta...');
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(cred => cred.user.updateProfile({ displayName: name }))
+    .then(()=>{ errEl.style.display='none'; })
+    .catch(err=>{
+      hideLoading();
+      const msgs={'auth/email-already-in-use':'Ese correo ya está registrado.','auth/invalid-email':'Correo inválido.','auth/weak-password':'Contraseña demasiado débil.'};
+      errEl.textContent = msgs[err.code]||'Error al crear la cuenta.';
+      errEl.style.display='block';
+    });
+}
+
+function confirmLogout(){
+  if(confirm('¿Deseas cerrar sesión?')){
+    auth.signOut();
+    showToast('👋 Sesión cerrada');
+  }
+}
+
+async function applySession(firebaseUser){
+  currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName || firebaseUser.email };
+  await loadAllUserData(firebaseUser.uid);
+  const name = currentUser.name;
+  document.querySelector('.user-name').textContent = name;
+  document.querySelector('.user-avatar').textContent = name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  document.querySelector('.user-role').textContent = 'Administrador';
+  document.getElementById('f-ejecutivo').value = name;
+  selectedClientId = clients.length ? clients[0].id : null;
+  currentTab = 'resumen';
+  renderList();
+  renderDetail();
+  document.getElementById('authScreen').classList.add('hidden');
+}
+
+// ── Update login form label to say "Correo" instead of "Usuario" ──
+document.addEventListener('DOMContentLoaded', ()=>{
+  const lbl = document.querySelector('label[for="loginUser"], .auth-label');
+  // Update placeholder to show email
+  const inp = document.getElementById('loginUser');
+  if(inp){ inp.placeholder='tu@correo.com'; inp.type='email'; }
+  const regInp = document.getElementById('regUser');
+  if(regInp){ regInp.placeholder='tu@correo.com'; regInp.type='email'; }
+});
+
+// ─── DELETE ────────────────────────────────────────────────
+function openDeleteModal(){
+  const c=clients.find(x=>x.id===selectedClientId);
+  if(!c)return;
+  document.getElementById('deleteModalSub').textContent=`Vas a eliminar a "${c.name}". Esta acción no se puede deshacer.`;
+  document.getElementById('deleteOverlay').classList.remove('hidden');
+}
+
+function closeDeleteModal(){
+  document.getElementById('deleteOverlay').classList.add('hidden');
+}
+
+function confirmDelete(){
+  const idx=clients.findIndex(c=>c.id===selectedClientId);
+  if(idx===-1)return;
+  const name=clients[idx].name;
+  clients.splice(idx,1);
+  saveData();
+  closeDeleteModal();
+  if(clients.length){
+    selectedClientId=clients[0].id;
+    renderList(document.getElementById('searchInput').value);
+    currentTab='resumen';
+    renderDetail();
+  } else {
+    selectedClientId=null;
+    renderList('');
+    document.getElementById('detailAvatar').textContent='';
+    document.getElementById('detailNameText').textContent='Selecciona un cliente';
+    document.getElementById('detailRut').textContent='';
+    document.getElementById('detailContent').innerHTML='<div style="padding:32px;color:var(--text-muted);font-size:14px">No hay clientes registrados.</div>';
+  }
+  showToast(`🗑️ "${name}" eliminado`,'#dc2626');
+}
+
+// ─── INIT ────────────────────────────────────────────────
+// Firebase Auth listener — handles login/logout automatically
+auth.onAuthStateChanged(async firebaseUser => {
+  if(firebaseUser){
+    await applySession(firebaseUser);
+  } else {
+    // Not logged in — show auth screen
+    currentUser = null;
+    clients = [];
+    document.getElementById('authScreen').classList.remove('hidden');
+    renderList();
+    renderDetail();
+    hideLoading();
+  }
+});
+
+// ══════════════════════════════════════════════
+// ─── DOCS (Documentos globales) ──────────────
+// ══════════════════════════════════════════════
+function docsKey(){ return 'cg_docs_' + currentUser; }
+function loadDocs(){ try{ return JSON.parse(localStorage.getItem(docsKey()))||[]; }catch(e){ return []; } }
+function saveDocs(docs){ localStorage.setItem(docsKey(), JSON.stringify(docs)); }
+
+function fmtSize(b){ if(b<1024)return b+'B'; if(b<1048576)return (b/1024).toFixed(1)+'KB'; return (b/1048576).toFixed(1)+'MB'; }
+function fmtDate(){ return new Date().toLocaleDateString('es-CL'); }
+function docTypeIcon(name){ const e=name.split('.').pop().toLowerCase(); if(e==='pdf')return '📄'; if(['xls','xlsx','csv'].includes(e))return '📊'; if(['doc','docx'].includes(e))return '📝'; if(['png','jpg','jpeg','gif','webp','svg'].includes(e))return '🖼️'; if(['zip','rar','7z'].includes(e))return '🗜️'; return '📎'; }
+function docTypeCat(name){ const e=name.split('.').pop().toLowerCase(); if(e==='pdf')return 'pdf'; if(['xls','xlsx','csv'].includes(e))return 'excel'; if(['doc','docx'].includes(e))return 'word'; if(['png','jpg','jpeg','gif','webp','svg'].includes(e))return 'imagen'; return 'otro'; }
+
+function populateDocClientFilter(){
+  const sel = document.getElementById('docFilterCliente');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todos los clientes</option>' + clients.map(c=>`<option value="${c.id}" ${c.id==cur?'selected':''}>${c.name}</option>`).join('');
+}
+
+function handleDocUpload(input){ processDocFiles(Array.from(input.files), ''); input.value=''; }
+function handleDocDrop(e){ e.preventDefault(); document.getElementById('docDropZone').classList.remove('drag-over'); processDocFiles(Array.from(e.dataTransfer.files),''); }
+
+function processDocFiles(files, clientId){
+  const docs = loadDocs();
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = ev => {
+      docs.push({ name:file.name, size:fmtSize(file.size), fecha:fmtDate(), clientId:clientId||'', type:docTypeCat(file.name), data:ev.target.result });
+      saveDocs(docs);
+      renderDocs();
+      // also update client tab if open
+      if(clientId && selectedClientId==clientId){
+        const c=clients.find(x=>x.id==clientId);
+        if(c){ if(!c.docs)c.docs=[]; c.docs.push({name:file.name,size:fmtSize(file.size),fecha:fmtDate(),data:ev.target.result}); saveData(); renderTabContent(c); }
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderDocs(){
+  const grid = document.getElementById('docsGrid');
+  const count = document.getElementById('docCount');
+  if(!grid) return;
+  let docs = loadDocs();
+  const filterC = document.getElementById('docFilterCliente')?.value||'';
+  const filterT = document.getElementById('docFilterTipo')?.value||'';
+  if(filterC) docs = docs.filter(d=>String(d.clientId)===filterC);
+  if(filterT) docs = docs.filter(d=>d.type===filterT);
+  if(count) count.textContent = docs.length + ' archivo' + (docs.length!==1?'s':'');
+  if(!docs.length){ grid.innerHTML='<div style="padding:20px;color:var(--text-muted);font-size:13.5px">No hay documentos aún.</div>'; return; }
+  const allDocs = loadDocs();
+  grid.innerHTML = docs.map(d=>{
+    const realIdx = allDocs.indexOf(d);
+    const clientName = d.clientId ? (clients.find(c=>String(c.id)===String(d.clientId))?.name||'') : '';
+    return `<div class="doc-card">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="doc-icon" style="background:var(--blue-light);font-size:22px">${docTypeIcon(d.name)}</div>
+        <div style="flex:1;min-width:0"><div class="doc-name">${d.name}</div><div class="doc-meta">${d.size} · ${d.fecha}${clientName?' · '+clientName:''}</div></div>
+      </div>
+      <div class="doc-actions">
+        <button class="btn-doc-dl" onclick="downloadGlobalDoc(${realIdx})">⬇ Descargar</button>
+        <button class="btn-doc-del" onclick="deleteGlobalDoc(${realIdx})" title="Eliminar">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function downloadGlobalDoc(idx){ const docs=loadDocs(); const d=docs[idx]; if(!d)return; const a=document.createElement('a'); a.href=d.data; a.download=d.name; a.click(); }
+function deleteGlobalDoc(idx){ if(!confirm('¿Eliminar este documento?'))return; const docs=loadDocs(); docs.splice(idx,1); saveDocs(docs); renderDocs(); showToast('🗑️ Documento eliminado','#dc2626'); }
+
+// client-tab docs
+function openDocUploadForClient(cid){ document.getElementById('clientDocInput_'+cid)?.click(); }
+function handleClientDocUpload(input,cid){
+  const files=Array.from(input.files); input.value='';
+  const c=clients.find(x=>x.id===cid); if(!c)return;
+  if(!c.docs)c.docs=[];
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      c.docs.push({name:file.name,size:fmtSize(file.size),fecha:fmtDate(),data:ev.target.result});
+      // also save to global docs
+      const docs=loadDocs();
+      docs.push({name:file.name,size:fmtSize(file.size),fecha:fmtDate(),clientId:cid,type:docTypeCat(file.name),data:ev.target.result});
+      saveDocs(docs);
+      saveData();
+      renderTabContent(c);
+      showToast('✅ Documento subido');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function downloadDoc(cid,idx){ const c=clients.find(x=>x.id===cid); if(!c||!c.docs)return; const d=c.docs[idx]; const a=document.createElement('a'); a.href=d.data; a.download=d.name; a.click(); }
+function deleteDoc(cid,idx){ if(!confirm('¿Eliminar este documento?'))return; const c=clients.find(x=>x.id===cid); if(!c||!c.docs)return; c.docs.splice(idx,1); saveData(); renderTabContent(c); showToast('🗑️ Documento eliminado','#dc2626'); }
+
+// ══════════════════════════════════════════════
+// ─── PLANILLA ────────────────────────────────
+// ══════════════════════════════════════════════
+function sheetKey(){ return 'cg_sheet_' + currentUser; }
+function presupKey(){ return 'cg_presup_' + currentUser; }
+function loadSheet(){ try{ return JSON.parse(localStorage.getItem(sheetKey()))||[]; }catch(e){ return []; } }
+function saveSheet(rows){ localStorage.setItem(sheetKey(), JSON.stringify(rows)); }
+function loadPresup(){ try{ return JSON.parse(localStorage.getItem(presupKey()))||{rows:[],year:new Date().getFullYear()}; }catch(e){ return {rows:[],year:new Date().getFullYear()}; } }
+function savePresup(p){ localStorage.setItem(presupKey(), JSON.stringify(p)); }
+
+function populateSheetClientFilter(){
+  ['sheetFilterCliente','cef-cliente'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML=(id==='sheetFilterCliente'?'<option value="">Todos los clientes</option>':'<option value="">Sin cliente específico</option>')+clients.map(c=>`<option value="${c.id}" ${c.id==cur?'selected':''}>${c.name}</option>`).join('');
+  });
+}
+
+function addSheetRow(){
+  const rows=loadSheet();
+  rows.push({id:Date.now(),cliente:'',concepto:'',tipo:'Ingreso',emision:'',venc:'',monto:'',estado:'Pendiente',doc:'',obs:''});
+  saveSheet(rows);
+  renderSheet();
+}
+
+function updateSheetCell(id,field,val){
+  const rows=loadSheet();
+  const r=rows.find(x=>x.id===id);
+  if(r){ r[field]=val; saveSheet(rows); updateSheetSummary(rows); }
+}
+
+function deleteSheetRow(id){
+  if(!confirm('¿Eliminar esta fila?'))return;
+  const rows=loadSheet().filter(x=>x.id!==id);
+  saveSheet(rows); renderSheet();
+}
+
+function renderSheet(){
+  const tbody=document.getElementById('sheetBody'); if(!tbody)return;
+  let rows=loadSheet();
+  const fC=document.getElementById('sheetFilterCliente')?.value||'';
+  const fT=document.getElementById('sheetFilterTipo')?.value||'';
+  const fE=document.getElementById('sheetFilterEstado')?.value||'';
+  let filtered=rows;
+  if(fC) filtered=filtered.filter(r=>String(r.cliente)===fC);
+  if(fT) filtered=filtered.filter(r=>r.tipo===fT);
+  if(fE) filtered=filtered.filter(r=>r.estado===fE);
+  const ESTADOS=['Pendiente','Pagado','Anulado'];
+  const TIPOS=['Ingreso','Egreso'];
+  tbody.innerHTML=filtered.map((r,i)=>{
+    const clientOpts=clients.map(c=>`<option value="${c.id}" ${r.cliente==c.id?'selected':''}>${c.name}</option>`).join('');
+    const estadoOpts=ESTADOS.map(s=>`<option ${r.estado===s?'selected':''}>${s}</option>`).join('');
+    const tipoOpts=TIPOS.map(t=>`<option ${r.tipo===t?'selected':''}>${t}</option>`).join('');
+    return `<tr>
+      <td style="text-align:center;padding:8px;color:var(--text-muted);font-size:12px">${i+1}</td>
+      <td><select onchange="updateSheetCell(${r.id},'cliente',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:inherit;font-size:13px;background:transparent"><option value="">—</option>${clientOpts}</select></td>
+      <td><input value="${r.concepto||''}" placeholder="Concepto..." onchange="updateSheetCell(${r.id},'concepto',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:inherit;font-size:13px;background:transparent"></td>
+      <td><select onchange="updateSheetCell(${r.id},'tipo',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:inherit;font-size:13px;background:transparent;color:${r.tipo==='Ingreso'?'#16a34a':'#dc2626'}">${tipoOpts}</select></td>
+      <td><input type="date" value="${r.emision||''}" onchange="updateSheetCell(${r.id},'emision',this.value)" style="width:100%;border:none;outline:none;padding:8px 6px;font-family:inherit;font-size:12px;background:transparent"></td>
+      <td><input type="date" value="${r.venc||''}" onchange="updateSheetCell(${r.id},'venc',this.value)" style="width:100%;border:none;outline:none;padding:8px 6px;font-family:inherit;font-size:12px;background:transparent"></td>
+      <td class="td-num"><input type="number" value="${r.monto||''}" placeholder="0" onchange="updateSheetCell(${r.id},'monto',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:'DM Mono',monospace;font-size:13px;background:transparent;text-align:right"></td>
+      <td class="td-badge"><select onchange="updateSheetCell(${r.id},'estado',this.value)" style="width:100%;border:none;outline:none;padding:6px 8px;font-family:inherit;font-size:12px;border-radius:6px;background:${r.estado==='Pagado'?'#dcfce7':r.estado==='Pendiente'?'#fff7ed':'#f1f5f9'};color:${r.estado==='Pagado'?'#16a34a':r.estado==='Pendiente'?'#ea580c':'#64748b'};font-weight:600">${estadoOpts}</select></td>
+      <td><input value="${r.doc||''}" placeholder="Boleta/Factura..." onchange="updateSheetCell(${r.id},'doc',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:transparent"></td>
+      <td><input value="${r.obs||''}" placeholder="Observación..." onchange="updateSheetCell(${r.id},'obs',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:inherit;font-size:12px;background:transparent"></td>
+      <td style="text-align:center;padding:4px"><button class="btn-row-del" onclick="deleteSheetRow(${r.id})">🗑</button></td>
+    </tr>`;
+  }).join('');
+  updateSheetSummary(filtered);
+}
+
+function updateSheetSummary(rows){
+  const ingresos=rows.filter(r=>r.tipo==='Ingreso'&&r.estado!=='Anulado').reduce((s,r)=>s+parseFloat(r.monto||0),0);
+  const egresos=rows.filter(r=>r.tipo==='Egreso'&&r.estado!=='Anulado').reduce((s,r)=>s+parseFloat(r.monto||0),0);
+  const fmt=v=>'$'+Math.round(v).toLocaleString('es-CL');
+  const summary=document.getElementById('sheetSummary');
+  if(summary) summary.innerHTML=`<span style="color:#16a34a">↑ ${fmt(ingresos)}</span>  <span style="color:#dc2626;margin-left:12px">↓ ${fmt(egresos)}</span>  <span style="font-weight:800;margin-left:12px">= ${fmt(ingresos-egresos)}</span>`;
+  const totVal=document.getElementById('sheetTotalsVal');
+  if(totVal) totVal.innerHTML=`<span style="color:#16a34a">Ingresos: ${fmt(ingresos)}</span> &nbsp;|&nbsp; <span style="color:#dc2626">Egresos: ${fmt(egresos)}</span> &nbsp;|&nbsp; <strong>Neto: ${fmt(ingresos-egresos)}</strong>`;
+}
+
+function switchSheetTab(tab, el){
+  document.querySelectorAll('.sheet-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sheet-ingresos').style.display=tab==='ingresos'?'flex':'none';
+  const presDiv=document.getElementById('sheet-presupuesto');
+  presDiv.style.display=tab==='presupuesto'?'flex':'none';
+  if(tab==='presupuesto') renderPresupuesto();
+}
+
+// PRESUPUESTO ANUAL
+function renderPresupuesto(){
+  const yearSel=document.getElementById('presupYear'); if(!yearSel)return;
+  const curYear=new Date().getFullYear();
+  if(!yearSel.options.length){ for(let y=curYear-2;y<=curYear+2;y++){ const o=document.createElement('option'); o.value=y; o.text=y; if(y===curYear)o.selected=true; yearSel.appendChild(o); } }
+  const year=parseInt(yearSel.value)||curYear;
+  const p=loadPresup();
+  if(!p.rows) p.rows=[];
+  const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const header=document.getElementById('presupHeader');
+  header.innerHTML=`<th style="min-width:160px">Categoría</th><th style="width:80px">Tipo</th>`+MONTHS.map(m=>`<th class="presup-month-header" style="min-width:90px">${m}</th>`).join('')+`<th class="presup-total-col" style="min-width:100px">Total</th><th style="width:36px"></th>`;
+  const tbody=document.getElementById('presupBody');
+  tbody.innerHTML=p.rows.map((r,i)=>{
+    const tipoColor=r.tipo==='Ingreso'?'#16a34a':'#dc2626';
+    const monthCells=MONTHS.map((_,mi)=>`<td class="td-num"><input type="number" value="${r.meses&&r.meses[mi]||''}" placeholder="0" onchange="updatePresupCell(${i},${mi},this.value)" style="width:100%;border:none;outline:none;padding:7px 8px;font-family:'DM Mono',monospace;font-size:12.5px;background:transparent;text-align:right"></td>`).join('');
+    const total=(r.meses||[]).reduce((s,v)=>s+parseFloat(v||0),0);
+    return `<tr>
+      <td><input value="${r.cat||''}" placeholder="Categoría..." onchange="updatePresupCat(${i},'cat',this.value)" style="width:100%;border:none;outline:none;padding:8px 10px;font-family:inherit;font-size:13px;background:transparent"></td>
+      <td><select onchange="updatePresupCat(${i},'tipo',this.value)" style="width:100%;border:none;outline:none;padding:7px 8px;font-family:inherit;font-size:12px;background:transparent;color:${tipoColor};font-weight:600"><option ${r.tipo==='Ingreso'?'selected':''}>Ingreso</option><option ${r.tipo==='Egreso'?'selected':''}>Egreso</option></select></td>
+      ${monthCells}
+      <td class="presup-total-col td-num" style="padding:8px 10px;font-family:'DM Mono',monospace;font-size:13px;color:${tipoColor};font-weight:700">$${Math.round(total).toLocaleString('es-CL')}</td>
+      <td style="text-align:center;padding:4px"><button class="btn-row-del" onclick="deletePresupRow(${i})">🗑</button></td>
+    </tr>`;
+  }).join('');
+  // totals row
+  const totRow=document.getElementById('presupTotals');
+  const monthTotals=MONTHS.map((_,mi)=>{
+    const t=p.rows.reduce((s,r)=>{const v=parseFloat((r.meses&&r.meses[mi])||0); return s+(r.tipo==='Ingreso'?v:-v);},0);
+    return `<td class="td-num presup-total-col" style="padding:8px;font-family:'DM Mono',monospace;font-size:12px;color:${t>=0?'#16a34a':'#dc2626'};text-align:right">$${Math.round(t).toLocaleString('es-CL')}</td>`;
+  }).join('');
+  const grandTotal=p.rows.reduce((s,r)=>{const t=(r.meses||[]).reduce((ss,v)=>ss+parseFloat(v||0),0); return s+(r.tipo==='Ingreso'?t:-t);},0);
+  totRow.innerHTML=`<td colspan="2" style="padding:8px 12px;font-size:12px;color:var(--text-muted)">TOTAL NETO</td>${monthTotals}<td class="presup-total-col" style="padding:8px 10px;font-weight:800;color:${grandTotal>=0?'#16a34a':'#dc2626'};font-family:'DM Mono',monospace">$${Math.round(grandTotal).toLocaleString('es-CL')}</td><td></td>`;
+}
+
+function updatePresupCell(rowIdx,monthIdx,val){
+  const p=loadPresup(); if(!p.rows[rowIdx])return;
+  if(!p.rows[rowIdx].meses) p.rows[rowIdx].meses=new Array(12).fill('');
+  p.rows[rowIdx].meses[monthIdx]=val;
+  savePresup(p); renderPresupuesto();
+}
+function updatePresupCat(rowIdx,field,val){ const p=loadPresup(); if(!p.rows[rowIdx])return; p.rows[rowIdx][field]=val; savePresup(p); renderPresupuesto(); }
+function addPresupRow(){ const p=loadPresup(); p.rows.push({cat:'',tipo:'Ingreso',meses:new Array(12).fill('')}); savePresup(p); renderPresupuesto(); }
+function deletePresupRow(idx){ if(!confirm('¿Eliminar esta fila?'))return; const p=loadPresup(); p.rows.splice(idx,1); savePresup(p); renderPresupuesto(); }
+
+// ══════════════════════════════════════════════
+// ─── CALENDAR ────────────────────────────────
+// ══════════════════════════════════════════════
+function calEventsKey(){ return 'cg_calevents_' + currentUser; }
+function loadCalEvents(){ try{ return JSON.parse(localStorage.getItem(calEventsKey()))||[]; }catch(e){ return []; } }
+function saveCalEvents(evs){ localStorage.setItem(calEventsKey(), JSON.stringify(evs)); }
+
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+
+function calPrev(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); }
+function calNext(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); }
+
+function getAllCalEvents(){
+  const manual=loadCalEvents();
+  // also include client payment dates
+  const auto=[];
+  clients.forEach(c=>{
+    if(c.proximoPago&&c.proximoPago.fecha&&c.proximoPago.fecha!=='—'){
+      // parse "25 de mayo de 2024" style
+      const months={'enero':0,'febrero':1,'marzo':2,'abril':3,'mayo':4,'junio':5,'julio':6,'agosto':7,'septiembre':8,'octubre':9,'noviembre':10,'diciembre':11};
+      const parts=c.proximoPago.fecha.toLowerCase().split(' de ');
+      if(parts.length===3){
+        const d=parseInt(parts[0]), m=months[parts[1]], y=parseInt(parts[2]);
+        if(!isNaN(d)&&m!==undefined&&!isNaN(y)){
+          auto.push({id:'auto_'+c.id,titulo:'Pago: '+c.name,fecha:`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,tipo:'pago',desc:c.proximoPago.servicio+' · '+c.proximoPago.monto,clientId:c.id,auto:true});
+        }
+      }
+    }
+  });
+  return [...auto,...manual];
+}
+
+function renderCalendar(){
+  const grid=document.getElementById('calGrid'); if(!grid)return;
+  const title=document.getElementById('calTitle');
+  const MONTHS_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DAYS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  title.textContent=MONTHS_ES[calMonth]+' '+calYear;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+  const allEvs=getAllCalEvents();
+  let html=DAYS.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  let day=1, nextDay=1;
+  for(let i=0;i<42;i++){
+    let date,otherMonth=false,cellDate;
+    if(i<firstDay){ date=daysInPrev-firstDay+i+1; otherMonth=true; cellDate=new Date(calYear,calMonth-1,date); }
+    else if(day>daysInMonth){ date=nextDay++; otherMonth=true; cellDate=new Date(calYear,calMonth+1,date); }
+    else{ date=day++; cellDate=new Date(calYear,calMonth,date); }
+    const isToday=cellDate.getTime()===today.getTime();
+    const dateStr=`${cellDate.getFullYear()}-${String(cellDate.getMonth()+1).padStart(2,'0')}-${String(cellDate.getDate()).padStart(2,'0')}`;
+    const dayEvs=allEvs.filter(e=>e.fecha===dateStr);
+    const evHTML=dayEvs.slice(0,3).map(e=>`<div class="cal-event ev-${e.tipo}" title="${e.titulo}">${e.titulo}</div>`).join('');
+    const more=dayEvs.length>3?`<div style="font-size:10px;color:var(--text-muted)">+${dayEvs.length-3} más</div>`:'';
+    html+=`<div class="cal-cell${isToday?' today':''}${otherMonth?' other-month':''}">
+      <div class="cal-cell-num">${date}</div>
+      ${evHTML}${more}
+    </div>`;
+  }
+  grid.innerHTML=html;
+  renderCalEventsList();
+}
+
+function renderCalEventsList(){
+  const list=document.getElementById('calEventsList'); if(!list)return;
+  const allEvs=getAllCalEvents();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const upcoming=allEvs.filter(e=>new Date(e.fecha+'T00:00:00')>=today).sort((a,b)=>a.fecha.localeCompare(b.fecha)).slice(0,15);
+  const colors={pago:'#e0407b',reunion:'#16a34a',otro:'#64748b'};
+  list.innerHTML=`<div style="font-size:14px;font-weight:700;margin-bottom:12px">Próximos eventos</div>`+
+    (upcoming.length?upcoming.map(e=>{
+      const d=new Date(e.fecha+'T00:00:00');
+      const dStr=d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      const delBtn=e.auto?'':`<button onclick="deleteCalEvent(${e.id})" title="Eliminar evento" style="width:24px;height:24px;border:none;background:none;cursor:pointer;color:#fca5a5;font-size:14px;flex-shrink:0;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.background='#fee2e2';this.style.color='#dc2626'" onmouseout="this.style.background='none';this.style.color='#fca5a5'">✕</button>`;
+      return `<div class="cal-ev-item" style="align-items:center">
+        <div class="cal-ev-dot" style="background:${colors[e.tipo]||'#64748b'}"></div>
+        <div class="cal-ev-info"><div class="cal-ev-title">${e.titulo}</div><div class="cal-ev-sub">${e.desc||''}</div></div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0"><span class="cal-ev-date">${dStr}</span>${delBtn}</div>
+      </div>`;
+    }).join(''):'<p style="color:var(--text-muted);font-size:13px">No hay eventos próximos.</p>');
+}
+
+function deleteCalEvent(id){
+  if(!confirm('¿Eliminar este evento?')) return;
+  const evs=loadCalEvents().filter(e=>e.id!==id);
+  saveCalEvents(evs);
+  renderCalendar();
+  showToast('🗑️ Evento eliminado','#dc2626');
+}
+
+function openCalEventModal(fecha=''){
+  populateSheetClientFilter();
+  document.getElementById('cef-titulo').value='';
+  document.getElementById('cef-fecha').value=fecha||new Date().toISOString().split('T')[0];
+  document.getElementById('cef-hora').value='10:00';
+  document.getElementById('cef-desc').value='';
+  document.getElementById('cef-tipo').value='pago';
+  document.getElementById('calModalOverlay').classList.remove('hidden');
+}
+function closeCalModal(){ document.getElementById('calModalOverlay').classList.add('hidden'); }
+
+function saveCalEvent(){
+  const titulo=document.getElementById('cef-titulo').value.trim();
+  const fecha=document.getElementById('cef-fecha').value;
+  if(!titulo||!fecha){showToast('⚠️ Título y fecha son obligatorios','#d97706');return;}
+  const evs=loadCalEvents();
+  evs.push({id:Date.now(),titulo,fecha,hora:document.getElementById('cef-hora').value,tipo:document.getElementById('cef-tipo').value,clientId:document.getElementById('cef-cliente').value,desc:document.getElementById('cef-desc').value});
+  saveCalEvents(evs);
+  closeCalModal();
+  renderCalendar();
+  showToast('✅ Evento guardado');
+}
+
+// ── EXPORT FUNCTIONS ──
+function buildICSContent(){
+  const evs=getAllCalEvents();
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ControlGest//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  evs.forEach(e=>{
+    const d=e.fecha.replace(/-/g,'');
+    const uid=e.id+'@controlgest';
+    lines.push('BEGIN:VEVENT',`DTSTART;VALUE=DATE:${d}`,`DTEND;VALUE=DATE:${d}`,`SUMMARY:${e.titulo}`,`DESCRIPTION:${e.desc||''}`,`UID:${uid}`,'END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
+function exportICS(){
+  const content=buildICSContent();
+  const blob=new Blob([content],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='controlgest_calendario.ics'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Archivo .ics descargado');
+}
+
+function exportGoogleCal(){
+  // Open each event in Google Calendar (for all upcoming events, open first one with instructions)
+  const evs=getAllCalEvents().filter(e=>e.fecha>=new Date().toISOString().split('T')[0]).slice(0,1);
+  if(!evs.length){showToast('⚠️ No hay eventos próximos para exportar','#d97706');return;}
+  const e=evs[0];
+  const d=e.fecha.replace(/-/g,'');
+  const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(e.titulo)}&dates=${d}/${d}&details=${encodeURIComponent(e.desc||'')}`;
+  window.open(url,'_blank');
+  showToast('📅 Descarga el .ics para importar todos los eventos de una vez');
+}
+
+function exportOutlook(){
+  // Outlook Web supports direct .ics import
+  exportICS();
+  window.open('https://outlook.live.com/calendar/0/addcalendar','_blank');
+  showToast('📅 Archivo .ics descargado — impórtalo en Outlook');
+}
+
+
+// ══════════════════════════════════════════════
+// ─── EXCEL IMPORT / EXPORT ───────────────────
+// ══════════════════════════════════════════════
+function exportSheetExcel(){
+  const rows = loadSheet();
+  const header = ['#','Cliente','Concepto/Servicio','Tipo','Fecha Emisión','Fecha Vencimiento','Monto','Estado','N° Documento','Observación'];
+  const csvRows = [header];
+  rows.forEach((r,i)=>{
+    const clientName = clients.find(c=>String(c.id)===String(r.cliente))?.name || r.cliente || '';
+    csvRows.push([
+      i+1, clientName, r.concepto||'', r.tipo||'', r.emision||'', r.venc||'',
+      r.monto||'', r.estado||'', r.doc||'', r.obs||''
+    ]);
+  });
+  // Add summary rows
+  const ingresos = rows.filter(r=>r.tipo==='Ingreso'&&r.estado!=='Anulado').reduce((s,r)=>s+parseFloat(r.monto||0),0);
+  const egresos  = rows.filter(r=>r.tipo==='Egreso' &&r.estado!=='Anulado').reduce((s,r)=>s+parseFloat(r.monto||0),0);
+  csvRows.push([]);
+  csvRows.push(['','','','','','','TOTALES','','','']);
+  csvRows.push(['','','','','','Total Ingresos',Math.round(ingresos),'','','']);
+  csvRows.push(['','','','','','Total Egresos', Math.round(egresos),'','','']);
+  csvRows.push(['','','','','','Neto',           Math.round(ingresos-egresos),'','','']);
+
+  const csv = csvRows.map(row=>row.map(cell=>{
+    const s = String(cell).replace(/"/g,'""');
+    return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s}"` : s;
+  }).join(',')).join('\r\n');
+
+  const bom = '\uFEFF'; // UTF-8 BOM so Excel shows accents correctly
+  const blob = new Blob([bom+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='planilla_controlgest.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Excel/CSV exportado correctamente');
+}
+
+function importSheetExcel(){ document.getElementById('sheetImportInput').click(); }
+
+function handleSheetImport(input){
+  const file = input.files[0]; if(!file){ input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const text = ev.target.result;
+    // Parse CSV (handles quoted fields)
+    const lines = text.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length < 2){ showToast('⚠️ El archivo está vacío o no tiene datos','#d97706'); return; }
+    // Detect if first row is header (contains non-numeric first col)
+    const firstCell = lines[0].split(',')[0].replace(/"/g,'').trim();
+    const startRow = isNaN(firstCell) && firstCell!=='' ? 1 : 0;
+    const rows = loadSheet();
+    let added = 0;
+    for(let i=startRow; i<lines.length; i++){
+      const cols = parseCSVLine(lines[i]);
+      if(cols.length < 3) continue;
+      // Map columns: #, Cliente, Concepto, Tipo, FechaEmision, FechaVenc, Monto, Estado, Doc, Obs
+      const clientName = cols[1]||'';
+      const matchedClient = clients.find(c=>c.name.toLowerCase()===clientName.toLowerCase());
+      const row = {
+        id: Date.now()+i,
+        cliente: matchedClient ? matchedClient.id : '',
+        concepto: cols[2]||'',
+        tipo: (cols[3]||'').includes('Egr')?'Egreso':'Ingreso',
+        emision: cols[4]||'',
+        venc: cols[5]||'',
+        monto: parseFloat(String(cols[6]||'0').replace(/[^0-9.-]/g,''))||'',
+        estado: ['Pagado','Pendiente','Anulado'].includes(cols[7])?cols[7]:'Pendiente',
+        doc: cols[8]||'',
+        obs: cols[9]||''
+      };
+      rows.push(row); added++;
+    }
+    saveSheet(rows);
+    renderSheet();
+    input.value='';
+    showToast(`✅ ${added} fila${added!==1?'s':''} importada${added!==1?'s':''} correctamente`);
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVLine(line){
+  const result=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){ if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ; }
+    else if(ch===','&&!inQ){ result.push(cur.trim()); cur=''; }
+    else cur+=ch;
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+// ══════════════════════════════════════════════
+// ─── PDF GENERATION ──────────────────────────
+// ══════════════════════════════════════════════
+function downloadClientPDF(){
+  const c = clients.find(x=>x.id===selectedClientId);
+  if(!c){ showToast('⚠️ Selecciona un cliente primero','#d97706'); return; }
+  showToast('⏳ Generando PDF...','#2563eb');
+
+  const sheetRows = loadSheet().filter(r=>String(r.cliente)===String(c.id));
+  const docs      = (c.docs||[]);
+  const calEvs    = getAllCalEvents().filter(e=>String(e.clientId)===String(c.id));
+
+  // Build inline HTML for the PDF window
+  const pagosIngresos = sheetRows.filter(r=>r.tipo==='Ingreso'&&r.estado!=='Anulado').reduce((s,r)=>s+parseFloat(r.monto||0),0);
+  const pagosEgresos  = sheetRows.filter(r=>r.tipo==='Egreso' &&r.estado!=='Anulado').reduce((s,r)=>s+parseFloat(r.monto||0),0);
+  const fmt = v=>'$'+Math.round(v).toLocaleString('es-CL');
+  const today = new Date().toLocaleDateString('es-CL',{year:'numeric',month:'long',day:'numeric'});
+
+  const pagoRows = c.pagos.map(p=>`
+    <tr>
+      <td>${p.doc}</td><td>${p.serv}</td><td>${p.emision}</td><td>${p.venc}</td>
+      <td style="text-align:right;font-weight:700">${p.monto}</td>
+      <td><span style="padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;background:${p.estado==='Pagado'?'#dcfce7':'#fff7ed'};color:${p.estado==='Pagado'?'#16a34a':'#ea580c'}">${p.estado}</span></td>
+    </tr>`).join('');
+
+  const sheetRowsHTML = sheetRows.map((r,i)=>{
+    const clientName = clients.find(cl=>String(cl.id)===String(r.cliente))?.name||'';
+    return `<tr>
+      <td>${i+1}</td><td>${r.concepto||'—'}</td>
+      <td style="color:${r.tipo==='Ingreso'?'#16a34a':'#dc2626'};font-weight:600">${r.tipo}</td>
+      <td>${r.emision||'—'}</td><td>${r.venc||'—'}</td>
+      <td style="text-align:right;font-family:monospace;font-weight:700">${r.monto?fmt(r.monto):'—'}</td>
+      <td><span style="padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:${r.estado==='Pagado'?'#dcfce7':r.estado==='Pendiente'?'#fff7ed':'#f1f5f9'};color:${r.estado==='Pagado'?'#16a34a':r.estado==='Pendiente'?'#ea580c':'#64748b'}">${r.estado}</span></td>
+      <td>${r.doc||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const calEvHTML = calEvs.map(e=>`
+    <tr><td>${e.titulo}</td><td>${e.fecha}</td><td>${e.tipo}</td><td>${e.desc||'—'}</td></tr>`).join('');
+
+  const docsHTML = docs.map(d=>`
+    <tr><td>${d.name}</td><td>${d.fecha}</td><td>${d.size}</td></tr>`).join('');
+
+  const needsHTML = (c.necesidades||[]).map(n=>`<li style="margin-bottom:4px">${n}</li>`).join('');
+
+  const pdfHTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ficha Cliente — ${c.name}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1a0a12;background:#fff;padding:0}
+  .page{padding:32px 36px;max-width:900px;margin:0 auto}
+  /* HEADER */
+  .pdf-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:18px;border-bottom:3px solid #e0407b;margin-bottom:24px}
+  .pdf-logo{display:flex;align-items:center;gap:10px}
+  .pdf-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#e0407b,#b5185a);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px}
+  .pdf-logo-name{font-size:20px;font-weight:800;letter-spacing:-.5px;color:#1a0a12}
+  .pdf-logo-sub{font-size:10px;color:#7a5068}
+  .pdf-meta{text-align:right;font-size:11px;color:#7a5068;line-height:1.7}
+  /* CLIENT TITLE */
+  .client-title-bar{background:linear-gradient(135deg,#3d0a2e,#7a1a5e);border-radius:12px;padding:20px 24px;margin-bottom:24px;color:#fff}
+  .client-name-pdf{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+  .client-rut-pdf{font-size:13px;opacity:.8}
+  .client-badges{display:flex;gap:8px;margin-top:10px}
+  .badge{padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;background:rgba(255,255,255,.2);color:#fff}
+  /* SECTIONS */
+  .section{margin-bottom:24px}
+  .section-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#e0407b;margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid #fde8f2;display:flex;align-items:center;gap:6px}
+  /* INFO GRID */
+  .info-grid-pdf{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
+  .info-field-pdf{background:#fdf8fb;border-radius:8px;padding:10px 14px}
+  .info-label-pdf{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#7a5068;margin-bottom:3px}
+  .info-value-pdf{font-size:13px;font-weight:600;color:#1a0a12}
+  /* TABLES */
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{background:#fdf0f5;padding:8px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#7a5068;border-bottom:1.5px solid #fde8f2}
+  td{padding:7px 10px;border-bottom:1px solid #fdf0f5;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fdf8fb}
+  /* SUMMARY BOXES */
+  .summary-boxes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:0}
+  .summary-box{border-radius:10px;padding:12px 14px;text-align:center}
+  .summary-box.green{background:#dcfce7;border:1px solid #bbf7d0}
+  .summary-box.red{background:#fee2e2;border:1px solid #fca5a5}
+  .summary-box.blue{background:#dbeafe;border:1px solid #bfdbfe}
+  .summary-box.gray{background:#f1f5f9;border:1px solid #e2e8f0}
+  .summary-box-val{font-size:15px;font-weight:800;margin-bottom:3px}
+  .summary-box-lbl{font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .summary-box.green .summary-box-val{color:#16a34a}
+  .summary-box.red   .summary-box-val{color:#dc2626}
+  .summary-box.blue  .summary-box-val{color:#2563eb}
+  /* FOOTER */
+  .pdf-footer{margin-top:32px;padding-top:14px;border-top:1px solid #fde8f2;display:flex;justify-content:space-between;font-size:10px;color:#7a5068}
+  .no-data{padding:14px;text-align:center;color:#7a5068;font-style:italic;font-size:11.5px;background:#fdf8fb;border-radius:8px}
+  @media print{
+    body{padding:0}
+    .page{padding:20px 24px}
+    .no-print{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="pdf-header">
+    <div class="pdf-logo">
+      <div class="pdf-logo-icon">CG</div>
+      <div>
+        <div class="pdf-logo-name">ControlGest</div>
+        <div class="pdf-logo-sub">Auditoría & Control</div>
+      </div>
+    </div>
+    <div class="pdf-meta">
+      <div><strong>Generado el:</strong> ${today}</div>
+      <div><strong>Ejecutivo:</strong> ${c.ejecutivo||'—'}</div>
+      <div><strong>Estado:</strong> ${c.estado||'—'}</div>
+    </div>
+  </div>
+
+  <!-- CLIENT TITLE BAR -->
+  <div class="client-title-bar">
+    <div class="client-name-pdf">${c.name}</div>
+    <div class="client-rut-pdf">RUT: ${c.rut||'—'}</div>
+    <div class="client-badges">
+      <span class="badge">${c.segmento||'—'}</span>
+      <span class="badge">${c.giro||'—'}</span>
+      <span class="badge">Registro: ${c.registro||'—'}</span>
+    </div>
+  </div>
+
+  <!-- INFORMACION GENERAL -->
+  <div class="section">
+    <div class="section-title">📋 Información General</div>
+    <div class="info-grid-pdf">
+      <div class="info-field-pdf"><div class="info-label-pdf">Razón Social</div><div class="info-value-pdf">${c.name}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">RUT</div><div class="info-value-pdf">${c.rut||'—'}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">Giro</div><div class="info-value-pdf">${c.giro||'—'}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">Teléfono</div><div class="info-value-pdf">${c.telefono||'—'}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">Correo</div><div class="info-value-pdf">${c.correo||'—'}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">Dirección</div><div class="info-value-pdf">${c.direccion||'—'}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">Ejecutivo Asignado</div><div class="info-value-pdf">${c.ejecutivo||'—'}</div></div>
+      <div class="info-field-pdf"><div class="info-label-pdf">Fecha de Registro</div><div class="info-value-pdf">${c.registro||'—'}</div></div>
+    </div>
+  </div>
+
+  <!-- RESUMEN FINANCIERO -->
+  <div class="section">
+    <div class="section-title">💰 Resumen Financiero</div>
+    <div class="summary-boxes">
+      <div class="summary-box blue">
+        <div class="summary-box-val">${c.totalServicios||'0'}</div>
+        <div class="summary-box-lbl">Servicios contratados</div>
+      </div>
+      <div class="summary-box green">
+        <div class="summary-box-val">${pagosIngresos?fmt(pagosIngresos):(c.totalPagado||'—')}</div>
+        <div class="summary-box-lbl">Total pagado</div>
+      </div>
+      <div class="summary-box red">
+        <div class="summary-box-val">${pagosEgresos?fmt(pagosEgresos):(c.totalPendiente||'—')}</div>
+        <div class="summary-box-lbl">Total egresos/pendiente</div>
+      </div>
+      <div class="summary-box gray">
+        <div class="summary-box-val">${c.proximoPago?.fecha||'—'}</div>
+        <div class="summary-box-lbl">Próximo pago</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NECESIDADES -->
+  ${c.necesidades?.length ? `<div class="section">
+    <div class="section-title">🎯 Necesidades del Cliente</div>
+    <ul style="padding-left:18px;line-height:1.9;color:#1a0a12">
+      ${needsHTML}
+    </ul>
+    ${c.obs?`<div style="margin-top:10px;padding:10px 14px;background:#fdf8fb;border-radius:8px;font-size:12px"><strong>Observaciones:</strong> ${c.obs}</div>`:''}
+  </div>` : ''}
+
+  <!-- CALENDARIO DE PAGOS (del cliente) -->
+  <div class="section">
+    <div class="section-title">📅 Calendario de Pagos del Cliente</div>
+    ${c.pagos?.length ? `<table>
+      <thead><tr><th>N° Doc</th><th>Servicio</th><th>F. Emisión</th><th>F. Vencimiento</th><th style="text-align:right">Monto</th><th>Estado</th></tr></thead>
+      <tbody>${pagoRows}</tbody>
+    </table>` : '<div class="no-data">Sin pagos registrados</div>'}
+  </div>
+
+  <!-- PLANILLA MOVIMIENTOS -->
+  <div class="section">
+    <div class="section-title">📊 Movimientos en Planilla</div>
+    ${sheetRows.length ? `<table>
+      <thead><tr><th>#</th><th>Concepto</th><th>Tipo</th><th>F. Emisión</th><th>F. Vencimiento</th><th style="text-align:right">Monto</th><th>Estado</th><th>N° Doc</th></tr></thead>
+      <tbody>${sheetRowsHTML}</tbody>
+    </table>
+    <div style="margin-top:10px;padding:10px 14px;background:#fdf0f5;border-radius:8px;display:flex;gap:24px;font-size:12px;font-weight:700">
+      <span style="color:#16a34a">↑ Ingresos: ${fmt(pagosIngresos)}</span>
+      <span style="color:#dc2626">↓ Egresos: ${fmt(pagosEgresos)}</span>
+      <span>= Neto: ${fmt(pagosIngresos-pagosEgresos)}</span>
+    </div>` : '<div class="no-data">Sin movimientos registrados en planilla</div>'}
+  </div>
+
+  <!-- EVENTOS DE CALENDARIO -->
+  ${calEvs.length ? `<div class="section">
+    <div class="section-title">🗓️ Eventos y Reuniones</div>
+    <table>
+      <thead><tr><th>Evento</th><th>Fecha</th><th>Tipo</th><th>Descripción</th></tr></thead>
+      <tbody>${calEvHTML}</tbody>
+    </table>
+  </div>` : ''}
+
+  <!-- DOCUMENTOS -->
+  ${docs.length ? `<div class="section">
+    <div class="section-title">📁 Documentos Asociados</div>
+    <table>
+      <thead><tr><th>Nombre del archivo</th><th>Fecha de carga</th><th>Tamaño</th></tr></thead>
+      <tbody>${docsHTML}</tbody>
+    </table>
+  </div>` : ''}
+
+  <!-- FOOTER -->
+  <div class="pdf-footer">
+    <span>ControlGest — Auditoría & Control</span>
+    <span>Generado el ${today} · Documento confidencial</span>
+    <span>${c.name} · RUT ${c.rut||'—'}</span>
+  </div>
+
+  <!-- PRINT BUTTON (hidden on print) -->
+  <div class="no-print" style="text-align:center;margin-top:28px">
+    <button onclick="window.print()" style="padding:12px 32px;background:linear-gradient(135deg,#e0407b,#b5185a);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:-.2px">
+      🖨️ Imprimir / Guardar como PDF
+    </button>
+    <p style="margin-top:10px;font-size:12px;color:#7a5068">En el diálogo de impresión, elige <strong>"Guardar como PDF"</strong> como destino.</p>
+  </div>
+
+</div>
+</body>
+</html>`;
+
+  const win = window.open('','_blank','width=960,height=800,scrollbars=yes');
+  if(!win){ showToast('⚠️ Permite ventanas emergentes para generar el PDF','#d97706'); return; }
+  win.document.write(pdfHTML);
+  win.document.close();
+  setTimeout(()=>{ showToast('✅ PDF listo — usa Ctrl+P para guardar'); }, 800);
+}
+
+</script>
+
+<!-- CALENDAR EVENT MODAL -->
+<div class="modal-overlay hidden" id="calModalOverlay" onclick="if(event.target===this)closeCalModal()">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <span class="modal-title" id="calModalTitle">Nuevo Evento</span>
+      <button class="modal-close" onclick="closeCalModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Título *</label>
+          <input class="form-input" id="cef-titulo" placeholder="Ej: Reunión de seguimiento">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" id="cef-tipo">
+            <option value="pago">Pago / Vencimiento</option>
+            <option value="reunion">Reunión</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Fecha *</label>
+          <input class="form-input" id="cef-fecha" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora</label>
+          <input class="form-input" id="cef-hora" type="time" value="10:00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cliente asociado</label>
+        <select class="form-select" id="cef-cliente">
+          <option value="">Sin cliente específico</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" id="cef-desc" placeholder="Detalles del evento..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeCalModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveCalEvent()">Guardar Evento</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
